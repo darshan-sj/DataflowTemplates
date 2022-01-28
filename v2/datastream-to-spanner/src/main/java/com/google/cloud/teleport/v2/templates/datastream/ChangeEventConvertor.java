@@ -216,6 +216,11 @@ public class ChangeEventConvertor {
           "Missing key columns from change event. " + keyColumnNames);
     }
     for (String columnName : columnNames) {
+      if (table.column(columnName) == null) {
+        throw new ChangeEventConvertorException(
+            "Missing column from change event. column=" + columnName + ", table=" + table.name()
+        );
+      }
       Type columnType = table.column(columnName).type();
       Value columnValue = null;
 
