@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.cloud.spanner.Mutation;
 import com.google.cloud.spanner.Value;
 import com.google.cloud.teleport.v2.templates.spanner.ddl.Ddl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Oracle implementation of ChangeEventContext that provides implementation of the
@@ -26,12 +28,27 @@ import com.google.cloud.teleport.v2.templates.spanner.ddl.Ddl;
  */
 class OracleChangeEventContext extends ChangeEventContext {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OracleChangeEventContext.class);
+  // Name Formatter
+  private static String changeName(String name){
+    String result = name.replaceAll("[\"]","").replaceAll("[~^/]","_");
+    if(result.charAt(0) == '_')
+    {
+      result = result.substring(1, result.length());
+    }
+    if(name.equalsIgnoreCase("GROUPING")){
+      return name + "_";
+    }
+    return result;
+  }
+
   public OracleChangeEventContext(JsonNode changeEvent, Ddl ddl, String shadowTablePrefix)
       throws ChangeEventConvertorException, InvalidChangeEventException {
     this.changeEvent = changeEvent;
     this.shadowTablePrefix = shadowTablePrefix;
-    this.dataTable = changeEvent.get(DatastreamConstants.EVENT_TABLE_NAME_KEY).asText();
+    this.dataTable = changeName(changeEvent.get(DatastreamConstants.EVENT_TABLE_NAME_KEY).asText());
     this.shadowTable = shadowTablePrefix + this.dataTable;
+    //LOG.info("From OracleChangeEventContext - OracleChangeEventContext:\nTable Name: " + this.dataTable + "shadowTableName: " + this.shadowTable + "DDL: " + ddl.prettyPrint() + "\nchangeEvent: " + changeEvent.toPrettyString());
     convertChangeEventToMutation(ddl);
   }
 
