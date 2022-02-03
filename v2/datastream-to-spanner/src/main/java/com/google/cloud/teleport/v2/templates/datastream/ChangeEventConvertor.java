@@ -106,7 +106,7 @@ public class ChangeEventConvertor {
       Mutation.WriteBuilder builder = Mutation.newInsertOrUpdateBuilder(shadowTableName);
 
       populateMutationBuilderWithEvent(
-          table, builder, changeEvent, keyColumnNames, requiredKeyColumnNames);
+          table, builder, changeEvent, keyColumnNames, requiredKeyColumnNames, false);
       return builder;
     } catch (Exception e) {
       throw new ChangeEventConvertorException(e);
@@ -193,8 +193,7 @@ public class ChangeEventConvertor {
               .map(keyCol -> keyCol.name())
               .map(colName -> changeName(colName.toLowerCase()))
               .collect(Collectors.toSet());
-      //LOG.info("\nColumns: " + keyColumns.toString());
-      populateMutationBuilderWithEvent(table, builder, changeEvent, changeEventKeys, keyColumns);
+      populateMutationBuilderWithEvent(table, builder, changeEvent, changeEventKeys, keyColumns, true);
 
       return builder.build();
     } catch (Exception e) {
@@ -241,7 +240,8 @@ public class ChangeEventConvertor {
       Mutation.WriteBuilder builder,
       JsonNode changeEvent,
       List<String> columnNames,
-      Set<String> keyColumnNames)
+      Set<String> keyColumnNames,
+      boolean populateLastUpdatedTimeStamp)
       throws ChangeEventConvertorException, InvalidChangeEventException {
     Set<String> columnNamesAsSet = new HashSet<>(columnNames);
     if (!columnNamesAsSet.containsAll(keyColumnNames)) {
@@ -306,6 +306,9 @@ public class ChangeEventConvertor {
                   + ")");
       }
       builder.set(columnName).to(columnValue);
+    }
+    if (populateLastUpdatedTimeStamp && table.column("LastUpdatedTime") != null) {
+      builder.set("LastUpdatedTime").to(Value.COMMIT_TIMESTAMP);
     }
   }
 
