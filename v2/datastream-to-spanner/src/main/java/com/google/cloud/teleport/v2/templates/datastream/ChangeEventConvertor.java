@@ -45,7 +45,7 @@ public class ChangeEventConvertor {
 
   static void verifySpannerSchema(Ddl ddl, JsonNode changeEvent)
       throws ChangeEventConvertorException, InvalidChangeEventException {
-    String tableName = changeEvent.get(DatastreamConstants.EVENT_TABLE_NAME_KEY).asText();
+    String tableName = changeName(changeEvent.get(DatastreamConstants.EVENT_TABLE_NAME_KEY).asText());
     if (ddl.table(tableName) == null) {
       throw new ChangeEventConvertorException(
           "Missing table from change event. table=" + tableName
@@ -53,7 +53,7 @@ public class ChangeEventConvertor {
     }
     List<String> changeEventKeys = getEventColumnKeys(changeEvent);
     for (String key : changeEventKeys) {
-      if (ddl.table(tableName).column(key) == null) {
+      if (ddl.table(tableName).column(changeName(key)) == null) {
         throw new ChangeEventConvertorException(
             "Missing column from change event. column=" + key + ", table=" + tableName
         );
@@ -67,10 +67,10 @@ public class ChangeEventConvertor {
     ObjectNode jsonNode = (ObjectNode) changeEvent;
     for (String key : changeEventKeys) {
       // Skip keys that are in lower case.
-      if (key.equals(key.toLowerCase())) {
+      if (key.equals(changeName(key.toLowerCase()))) {
         continue;
       }
-      jsonNode.set(key.toLowerCase(), changeEvent.get(key));
+      jsonNode.set(changeName(key.toLowerCase()), changeEvent.get(key));
       jsonNode.remove(key);
     }
   }
