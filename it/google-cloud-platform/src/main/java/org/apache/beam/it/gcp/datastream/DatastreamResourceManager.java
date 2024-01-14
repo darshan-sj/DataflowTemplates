@@ -92,11 +92,11 @@ public final class DatastreamResourceManager implements ResourceManager {
 
   private DatastreamResourceManager(Builder builder) throws IOException {
     DatastreamSettings.Builder datastreamSettingsBuilder = DatastreamSettings.newBuilder();
-    Set<Code> retryableCodes = new HashSet(datastreamSettingsBuilder.createConnectionProfileSettings()
-        .getRetryableCodes());
+    Set<Code> retryableCodes =
+        new HashSet(
+            datastreamSettingsBuilder.createConnectionProfileSettings().getRetryableCodes());
     retryableCodes.add(Code.INVALID_ARGUMENT);
-    datastreamSettingsBuilder.createConnectionProfileSettings()
-        .setRetryableCodes(retryableCodes);
+    datastreamSettingsBuilder.createConnectionProfileSettings().setRetryableCodes(retryableCodes);
     datastreamSettingsBuilder.setCredentialsProvider(builder.credentialsProvider);
 
     this.datastreamClient = DatastreamClient.create(datastreamSettingsBuilder.build());
