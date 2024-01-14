@@ -20,6 +20,7 @@ package org.apache.beam.it.gcp.datastream;
 import static org.apache.beam.it.gcp.datastream.DatastreamResourceManagerUtils.generateDatastreamId;
 
 import com.google.api.gax.core.CredentialsProvider;
+import com.google.api.gax.rpc.StatusCode.Code;
 import com.google.cloud.bigquery.DatasetId;
 import com.google.cloud.datastream.v1.AvroFileFormat;
 import com.google.cloud.datastream.v1.BigQueryDestinationConfig;
@@ -90,12 +91,21 @@ public final class DatastreamResourceManager implements ResourceManager {
   }
 
   private DatastreamResourceManager(Builder builder) throws IOException {
-    this(
-        DatastreamClient.create(
-            DatastreamSettings.newBuilder()
-                .setCredentialsProvider(builder.credentialsProvider)
-                .build()),
-        builder);
+    DatastreamSettings.Builder datastreamSettingsBuilder = DatastreamSettings.newBuilder();
+    Set<Code> retryableCodes = new HashSet(datastreamSettingsBuilder.createConnectionProfileSettings()
+        .getRetryableCodes());
+    retryableCodes.add(Code.INVALID_ARGUMENT);
+    datastreamSettingsBuilder.createConnectionProfileSettings()
+        .setRetryableCodes(retryableCodes);
+    datastreamSettingsBuilder.setCredentialsProvider(builder.credentialsProvider);
+
+    this.datastreamClient = DatastreamClient.create(datastreamSettingsBuilder.build());
+    this.testId = builder.testName;
+    this.projectId = builder.projectId;
+    this.location = builder.location;
+    this.createdStreamIds = Collections.synchronizedSet(new HashSet<>());
+    this.createdConnectionProfileIds = Collections.synchronizedSet(new HashSet<>());
+    this.privateConnectivity = builder.privateConnectivity;
   }
 
   @VisibleForTesting
