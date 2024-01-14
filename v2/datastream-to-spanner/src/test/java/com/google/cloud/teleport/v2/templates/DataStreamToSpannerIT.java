@@ -223,9 +223,24 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
       Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder)
       throws IOException {
 
-    // Create Datastream JDBC Source Connection profile and config
-    SourceConfig sourceConfig =
-        datastreamResourceManager.buildJDBCSourceConfig("mysql-profile", jdbcSource);
+    boolean success = false;
+    int tries = 0;
+    SourceConfig sourceConfig = null;
+    while (!success) {
+      try {
+        // Create Datastream JDBC Source Connection profile and config
+        sourceConfig =
+            datastreamResourceManager.buildJDBCSourceConfig("mysql-profile", jdbcSource);
+        success = true;
+      } catch (Exception e) {
+        if (tries < 5) {
+          System.out.println("Retrying i = " + tries);
+        } else {
+          throw e;
+        }
+      }
+      tries++;
+    }
 
     // Create Datastream GCS Destination Connection profile and config
     String gcsPrefix = getGcsPath(testName).replace("gs://" + artifactBucketName, "") + "/cdc/";
