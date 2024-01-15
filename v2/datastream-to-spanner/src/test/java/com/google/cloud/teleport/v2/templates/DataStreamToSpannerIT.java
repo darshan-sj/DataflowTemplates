@@ -226,6 +226,7 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
     boolean success = false;
     int tries = 0;
     SourceConfig sourceConfig = null;
+    LOG.info("JDBC Source hostname = " + jdbcSource.hostname());
     while (!success) {
       try {
         // Create Datastream JDBC Source Connection profile and config
@@ -233,7 +234,7 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
             datastreamResourceManager.buildJDBCSourceConfig("mysql-profile", jdbcSource);
         success = true;
       } catch (Exception e) {
-        if (tries < 5) {
+        if (tries < 1) {
           System.out.println("Retrying i = " + tries);
         } else {
           throw e;
