@@ -85,7 +85,7 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
   private SpannerResourceManager spannerResourceManager;
 
   @BeforeClass
-  public void setUpMySQL() {
+  public static void setUpMySQL() {
     jdbcResourceManager = CustomMySQLResourceManager.builder("DataStreamToSpannerIT").build();
   }
 
@@ -105,7 +105,7 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
   }
 
   @AfterClass
-  public void cleanUpMySQL() {
+  public static void cleanUpMySQL() {
     ResourceManagerUtils.cleanResources(jdbcResourceManager);
   }
 
