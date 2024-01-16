@@ -227,6 +227,7 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
     int tries = 0;
     SourceConfig sourceConfig = null;
     LOG.info("JDBC Source hostname = " + jdbcSource.hostname());
+    LOG.info("JDBC Source port = " + jdbcSource.port());
     while (!success) {
       try {
         // Create Datastream JDBC Source Connection profile and config
