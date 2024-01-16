@@ -51,7 +51,9 @@ import org.apache.beam.it.gcp.spanner.matchers.SpannerAsserts;
 import org.apache.beam.it.jdbc.CustomMySQLResourceManager;
 import org.apache.beam.it.jdbc.JDBCResourceManager;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -78,9 +80,14 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
 
   private static final List<String> COLUMNS = List.of(ROW_ID, NAME, AGE, MEMBER, ENTRY_ADDED);
 
-  private CustomMySQLResourceManager jdbcResourceManager;
+  private static CustomMySQLResourceManager jdbcResourceManager;
   private DatastreamResourceManager datastreamResourceManager;
   private SpannerResourceManager spannerResourceManager;
+
+  @BeforeClass
+  public void setUpMySQL() {
+    jdbcResourceManager = CustomMySQLResourceManager.builder("DataStreamToSpannerIT").build();
+  }
 
   @Before
   public void setUp() throws IOException {
@@ -94,13 +101,16 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
   @After
   public void cleanUp() {
     ResourceManagerUtils.cleanResources(
-        jdbcResourceManager, datastreamResourceManager, spannerResourceManager);
+        datastreamResourceManager, spannerResourceManager);
+  }
+
+  @AfterClass
+  public void cleanUpMySQL() {
+    ResourceManagerUtils.cleanResources(jdbcResourceManager);
   }
 
   @Test
   public void testDataStreamMySqlToSpanner() throws IOException {
-    // Create MySQL Resource manager
-    jdbcResourceManager = CustomMySQLResourceManager.builder(testName).build();
 
     // Arrange MySQL-compatible schema
     HashMap<String, String> columns = new HashMap<>();
@@ -158,8 +168,6 @@ public class DataStreamToSpannerIT extends TemplateTestBase {
 
   @Test
   public void testDataStreamMySqlToSpannerJson() throws IOException {
-    // Create MySQL Resource manager
-    jdbcResourceManager = CustomMySQLResourceManager.builder(testName).build();
 
     // Arrange MySQL-compatible schema
     HashMap<String, String> columns = new HashMap<>();
