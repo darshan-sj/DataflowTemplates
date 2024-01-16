@@ -65,10 +65,6 @@ public class CustomMySQLResourceManager extends AbstractJDBCResourceManager<MySQ
     return this.getPort(getJDBCPort());
   }
 
-  public String getHost() {
-
-  }
-
   /** Builder for {@link CustomMySQLResourceManager}. */
   public static final class Builder extends AbstractJDBCResourceManager.Builder<MySQLContainer<?>> {
 
