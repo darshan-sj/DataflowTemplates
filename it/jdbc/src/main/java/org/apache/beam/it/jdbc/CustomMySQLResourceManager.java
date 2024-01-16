@@ -38,10 +38,12 @@ public class CustomMySQLResourceManager extends AbstractJDBCResourceManager<MySQ
   // https://hub.docker.com/_/mysql/tags?tab=tags
   private static final String DEFAULT_MYSQL_CONTAINER_TAG = "8.0.30";
 
+  protected MySQLContainer container;
+
   private CustomMySQLResourceManager(Builder builder) {
     super(
         new MySQLContainer<>(
-            DockerImageName.parse(builder.containerImageName).withTag(builder.containerImageTag)),
+            DockerImageName.parse(builder.containerImageName).withTag(builder.containerImageTag)).withExposedPorts(MySQLContainer.MYSQL_PORT),
         builder);
   }
 
@@ -61,6 +63,10 @@ public class CustomMySQLResourceManager extends AbstractJDBCResourceManager<MySQ
 
   public int getPort() {
     return this.getPort(getJDBCPort());
+  }
+
+  public String getHost() {
+
   }
 
   /** Builder for {@link CustomMySQLResourceManager}. */
