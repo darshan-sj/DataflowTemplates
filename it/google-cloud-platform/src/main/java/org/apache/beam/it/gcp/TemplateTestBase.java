@@ -304,11 +304,7 @@ public abstract class TemplateTestBase {
             LOG.info("Running command to stage templates: {}", String.join(" ", mavenCmd));
 
             try {
-              ProcessBuilder processBuilder = new ProcessBuilder();
-              processBuilder.command(mavenCmd);
-              processBuilder.inheritIO();
-              Process exec = processBuilder.start();
-              // Process exec = Runtime.getRuntime().exec(mavenCmd);
+              Process exec = Runtime.getRuntime().exec(mavenCmd);
               IORedirectUtil.redirectLinesLog(exec.getInputStream(), LOG);
               IORedirectUtil.redirectLinesLog(exec.getErrorStream(), LOG);
 
