@@ -304,13 +304,19 @@ public abstract class TemplateTestBase {
             LOG.info("Running command to stage templates: {}", String.join(" ", mavenCmd));
 
             try {
-              Process exec = Runtime.getRuntime().exec(mavenCmd);
+              ProcessBuilder processBuilder = new ProcessBuilder();
+              processBuilder.command(mavenCmd);
+              processBuilder.inheritIO();
+              Process exec = processBuilder.start();
+              // Process exec = Runtime.getRuntime().exec(mavenCmd);
               IORedirectUtil.redirectLinesLog(exec.getInputStream(), LOG);
               IORedirectUtil.redirectLinesLog(exec.getErrorStream(), LOG);
 
+              LOG.info("Waiting for maven build to complete");
               if (exec.waitFor() != 0) {
                 throw new RuntimeException("Error staging template, check Maven logs.");
               }
+              LOG.info("Maven build is complete");
 
               boolean flex =
                   templateMetadata.flexContainerName() != null
