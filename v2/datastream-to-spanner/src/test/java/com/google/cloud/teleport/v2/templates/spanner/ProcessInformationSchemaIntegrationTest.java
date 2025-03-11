@@ -29,7 +29,7 @@ import com.google.cloud.teleport.v2.spanner.ddl.Ddl;
 import com.google.cloud.teleport.v2.spanner.ddl.InformationSchemaScanner;
 import com.google.cloud.teleport.v2.spanner.ddl.Table;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.junit.After;
 import org.junit.Before;

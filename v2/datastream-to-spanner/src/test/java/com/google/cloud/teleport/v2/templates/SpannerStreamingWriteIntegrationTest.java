@@ -36,7 +36,7 @@ import com.google.cloud.teleport.v2.values.FailsafeElement;
 import java.util.Arrays;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.View;

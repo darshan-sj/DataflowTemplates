@@ -37,8 +37,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerAccessor;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
+import com.google.cloud.teleport.v2.templates.SpannerAccessor;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.junit.Test;
 

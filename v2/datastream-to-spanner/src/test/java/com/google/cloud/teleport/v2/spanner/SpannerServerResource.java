@@ -22,7 +22,7 @@ import com.google.cloud.spanner.DatabaseId;
 import com.google.cloud.spanner.Spanner;
 import com.google.cloud.spanner.SpannerException;
 import com.google.cloud.spanner.SpannerOptions;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.junit.rules.ExternalResource;
 

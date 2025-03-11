@@ -29,6 +29,7 @@ import com.google.cloud.teleport.v2.coders.FailsafeElementCoder;
 import com.google.cloud.teleport.v2.common.UncaughtExceptionLogger;
 import com.google.cloud.teleport.v2.datastream.sources.DataStreamIO;
 import com.google.cloud.teleport.v2.datastream.utils.DataStreamClient;
+import com.google.cloud.teleport.v2.spanner.FailureInjectedSpannerService;
 import com.google.cloud.teleport.v2.spanner.ddl.Ddl;
 import com.google.cloud.teleport.v2.spanner.migrations.schema.ISchemaOverridesParser;
 import com.google.cloud.teleport.v2.spanner.migrations.schema.NoopSchemaOverridesParser;
@@ -63,7 +64,6 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.FileSystems;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.fs.ResolveOptions.StandardResolveOptions;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
 import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -656,6 +656,7 @@ public class DataStreamToSpanner {
             .withInstanceId(ValueProvider.StaticValueProvider.of(options.getInstanceId()))
             .withDatabaseId(ValueProvider.StaticValueProvider.of(options.getDatabaseId()))
             .withRpcPriority(ValueProvider.StaticValueProvider.of(options.getSpannerPriority()))
+            .withServiceFactory(new FailureInjectedSpannerService())
             .withCommitRetrySettings(
                 RetrySettings.newBuilder()
                     .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(4))

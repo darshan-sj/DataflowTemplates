@@ -38,13 +38,13 @@ import com.google.cloud.teleport.v2.spanner.migrations.utils.CustomTransformatio
 import com.google.cloud.teleport.v2.spanner.utils.ISpannerMigrationTransformer;
 import com.google.cloud.teleport.v2.spanner.utils.MigrationTransformationRequest;
 import com.google.cloud.teleport.v2.spanner.utils.MigrationTransformationResponse;
+import com.google.cloud.teleport.v2.templates.SpannerAccessor;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import com.google.cloud.teleport.v2.templates.constants.DatastreamToSpannerConstants;
 import com.google.cloud.teleport.v2.values.FailsafeElement;
 import java.io.Serializable;
 import java.util.Map;
 import javax.annotation.Nullable;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerAccessor;
-import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
 import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.metrics.Distribution;
 import org.apache.beam.sdk.metrics.Metrics;
