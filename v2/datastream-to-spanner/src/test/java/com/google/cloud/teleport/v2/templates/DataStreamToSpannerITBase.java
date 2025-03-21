@@ -255,6 +255,7 @@ public abstract class DataStreamToSpannerITBase extends TemplateTestBase {
             put("dlqGcsPubSubSubscription", dlqSubscription.toString());
             put("datastreamSourceType", "mysql");
             put("inputFileFormat", "avro");
+            put("spannerFailureInjectionOption", "1.0");
           }
         };
 

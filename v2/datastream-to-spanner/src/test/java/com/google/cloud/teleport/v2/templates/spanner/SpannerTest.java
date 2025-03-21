@@ -1,7 +1,19 @@
+/*
+ * Copyright (C) 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.google.cloud.teleport.v2.templates.spanner;
-
-import static com.google.cloud.teleport.v2.templates.spanner.DatastreamToSpannerExceptionClassifier.ErrorTag.RETRYABLE_ERROR;
-import static com.google.cloud.teleport.v2.templates.spanner.DatastreamToSpannerExceptionClassifierTest.assertSpannerExceptionClassification;
 
 import com.google.cloud.spanner.BatchClient;
 import com.google.cloud.spanner.DatabaseAdminClient;
@@ -13,8 +25,6 @@ import com.google.cloud.spanner.SpannerException;
 import com.google.cloud.spanner.SpannerOptions;
 import com.google.cloud.spanner.TransactionRunner.TransactionCallable;
 import com.google.cloud.spanner.spi.v1.SpannerInterceptorProvider;
-import com.google.cloud.teleport.v2.spanner.migrations.exceptions.SpannerExceptionParser;
-import com.google.cloud.teleport.v2.templates.spanner.DatastreamToSpannerExceptionClassifier.ErrorTag;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -24,16 +34,14 @@ import io.grpc.ForwardingClientCallListener.SimpleForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SpannerTest {
 
-  /** Injects errors in streaming calls to simulate call restarts */
+  /** Injects errors in streaming calls to simulate call restarts. */
   private static class GrpcErrorInjector implements ClientInterceptor {
 
     private final double errorProbability;
@@ -50,7 +58,8 @@ public class SpannerTest {
       if (!method.getFullMethodName().startsWith("google.spanner.v1.Spanner")) {
         return next.newCall(method, callOptions);
       }
-      // if (method.getFullMethodName().startsWith("google.spanner.v1.Spanner/BatchCreateSessions")) {
+      // if (method.getFullMethodName().startsWith("google.spanner.v1.Spanner/BatchCreateSessions"))
+      // {
       //   return next.newCall(method, callOptions);
       // }
 
@@ -92,10 +101,10 @@ public class SpannerTest {
       return random.nextDouble() < errorProbability;
     }
   }
+
   DatabaseClient databaseClient;
   BatchClient batchClient;
   DatabaseAdminClient databaseAdminClient;
-
 
   @Before
   public void setup() {
@@ -127,8 +136,7 @@ public class SpannerTest {
     SpannerOptions options = builder.build();
     Spanner spanner = options.getService();
 
-    databaseClient = spanner.getDatabaseClient(
-        DatabaseId.of(projectId, instanceId, databaseId));
+    databaseClient = spanner.getDatabaseClient(DatabaseId.of(projectId, instanceId, databaseId));
     batchClient = spanner.getBatchClient(DatabaseId.of(projectId, instanceId, databaseId));
     databaseAdminClient = spanner.getDatabaseAdminClient();
   }

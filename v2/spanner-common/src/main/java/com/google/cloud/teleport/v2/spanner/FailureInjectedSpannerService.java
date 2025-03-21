@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.google.cloud.teleport.v2.spanner;
 
 import com.google.cloud.ServiceFactory;
@@ -13,13 +28,21 @@ import io.grpc.ForwardingClientCallListener.SimpleForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
+import java.io.Serializable;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class FailureInjectedSpannerService implements ServiceFactory<Spanner, SpannerOptions> {
+public class FailureInjectedSpannerService implements ServiceFactory<Spanner, SpannerOptions>,
+    Serializable {
 
-  /** Injects errors in streaming calls to simulate call restarts */
-  private static class GrpcErrorInjector implements ClientInterceptor {
+  private static final Logger LOG = LoggerFactory.getLogger(FailureInjectedSpannerService.class);
+
+  private double errorProbability;
+
+  /** Injects errors in streaming calls to simulate call restarts. */
+  private static class GrpcErrorInjector implements ClientInterceptor, Serializable {
 
     private final double errorProbability;
     private final Random random = new Random();
@@ -35,7 +58,7 @@ public class FailureInjectedSpannerService implements ServiceFactory<Spanner, Sp
       if (!method.getFullMethodName().startsWith("google.spanner.v1.Spanner")) {
         return next.newCall(method, callOptions);
       }
-      if (method.getFullMethodName().startsWith("google.spanner.v1.Spanner/BatchCreateSessions")) {
+      if (method.getFullMethodName().startsWith("google.spanner.v1.Spanner/BatchCreateSessions") || method.getFullMethodName().startsWith("google.spanner.v1.Spanner/CreateSession")) {
         return next.newCall(method, callOptions);
       }
 
@@ -78,15 +101,22 @@ public class FailureInjectedSpannerService implements ServiceFactory<Spanner, Sp
     }
   }
 
+  public FailureInjectedSpannerService() {}
+
+  public FailureInjectedSpannerService(String parameter) {
+    errorProbability = Double.parseDouble(parameter);
+    LOG.error("The value of errorProbability env variable=" + errorProbability);
+  }
+
   @Override
   public Spanner create(SpannerOptions spannerOptions) {
-    double errorProbability = 1.0;
-
     SpannerInterceptorProvider interceptorProvider =
         SpannerInterceptorProvider.createDefault().with(new GrpcErrorInjector(errorProbability));
 
-    spannerOptions.toBuilder().setInterceptorProvider(interceptorProvider);
+    SpannerOptions.Builder builder = spannerOptions.toBuilder();
+    builder.setInterceptorProvider(interceptorProvider);
+    builder.setServiceFactory(null);
 
-    return spannerOptions.getService();
+    return builder.build().getService();
   }
 }

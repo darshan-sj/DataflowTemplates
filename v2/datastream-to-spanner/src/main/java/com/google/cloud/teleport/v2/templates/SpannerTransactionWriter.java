@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.beam.sdk.Pipeline;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;

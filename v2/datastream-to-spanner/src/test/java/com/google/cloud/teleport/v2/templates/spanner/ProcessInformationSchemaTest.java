@@ -30,6 +30,8 @@ import com.google.api.gax.longrunning.OperationFuture;
 import com.google.cloud.spanner.DatabaseAdminClient;
 import com.google.cloud.spanner.Dialect;
 import com.google.cloud.teleport.v2.spanner.ddl.Ddl;
+import com.google.cloud.teleport.v2.templates.SpannerAccessor;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import com.google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,8 +39,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.google.cloud.teleport.v2.templates.SpannerAccessor;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.junit.Test;
 

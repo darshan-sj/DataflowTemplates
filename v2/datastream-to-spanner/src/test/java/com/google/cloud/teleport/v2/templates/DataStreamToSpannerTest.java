@@ -25,7 +25,6 @@ import com.google.cloud.teleport.v2.spanner.migrations.schema.NoopSchemaOverride
 import com.google.cloud.teleport.v2.spanner.migrations.schema.SchemaFileOverridesParser;
 import com.google.cloud.teleport.v2.spanner.migrations.schema.SchemaStringOverridesParser;
 import com.google.common.io.Resources;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.junit.Rule;
 import org.junit.Test;

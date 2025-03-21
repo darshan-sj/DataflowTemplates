@@ -559,6 +559,14 @@ public class DataStreamToSpanner {
     String getShadowTableSpannerDatabaseId();
 
     void setShadowTableSpannerDatabaseId(String value);
+
+    @TemplateParameter.Text(
+        order = 34,
+        optional = true,
+        description = "Spanner Failure Injection option used for testing",
+        helpText = "This option is used for testing only")
+    String getSpannerFailureInjectionOption();
+    void setSpannerFailureInjectionOption(String myCustomOption);
   }
 
   private static void validateSourceType(Options options) {
@@ -616,6 +624,8 @@ public class DataStreamToSpanner {
   public static void main(String[] args) {
     UncaughtExceptionLogger.register();
     LOG.info("Starting DataStream to Cloud Spanner");
+    // double errorProbability = Double.parseDouble(System.getenv("spanner.inject.failure.OUT_OF_RANGE"));
+    // LOG.error("The value of errorProbability env variable=" + errorProbability);
     Options options = PipelineOptionsFactory.fromArgs(args).withValidation().as(Options.class);
     options.setStreaming(true);
     validateSourceType(options);
@@ -656,7 +666,6 @@ public class DataStreamToSpanner {
             .withInstanceId(ValueProvider.StaticValueProvider.of(options.getInstanceId()))
             .withDatabaseId(ValueProvider.StaticValueProvider.of(options.getDatabaseId()))
             .withRpcPriority(ValueProvider.StaticValueProvider.of(options.getSpannerPriority()))
-            .withServiceFactory(new FailureInjectedSpannerService())
             .withCommitRetrySettings(
                 RetrySettings.newBuilder()
                     .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(4))
@@ -771,6 +780,8 @@ public class DataStreamToSpanner {
     // Create the overrides mapping.
     ISchemaOverridesParser schemaOverridesParser = configureSchemaOverrides(options);
 
+    SpannerConfig failureInjectedConfig = spannerConfig.withServiceFactory(new FailureInjectedSpannerService(options.getSpannerFailureInjectionOption()));
+
     ChangeEventTransformerDoFn changeEventTransformerDoFn =
         ChangeEventTransformerDoFn.create(
             schema,
@@ -781,7 +792,7 @@ public class DataStreamToSpanner {
             customTransformation,
             options.getRoundJsonDecimals(),
             ddlView,
-            spannerConfig);
+            failureInjectedConfig);
 
     PCollectionTuple transformedRecords =
         jsonRecords.apply(
@@ -823,7 +834,7 @@ public class DataStreamToSpanner {
             .apply(
                 "Write events to Cloud Spanner",
                 new SpannerTransactionWriter(
-                    spannerConfig,
+                    failureInjectedConfig,
                     shadowTableSpannerConfig,
                     ddlView,
                     shadowTableDdlView,

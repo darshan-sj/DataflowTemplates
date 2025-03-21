@@ -29,6 +29,7 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.spanner.Options;
 import com.google.cloud.spanner.SpannerException;
 import com.google.cloud.spanner.TransactionRunner;
+import com.google.cloud.teleport.v2.spanner.FailureInjectedSpannerService;
 import com.google.cloud.teleport.v2.spanner.ddl.Ddl;
 import com.google.cloud.teleport.v2.spanner.migrations.exceptions.ChangeEventConvertorException;
 import com.google.cloud.teleport.v2.spanner.migrations.exceptions.DroppedTableException;
@@ -50,8 +51,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.beam.runners.dataflow.options.DataflowWorkerHarnessOptions;
-import com.google.cloud.teleport.v2.templates.SpannerAccessor;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.metrics.Distribution;
 import org.apache.beam.sdk.metrics.Metrics;
@@ -207,6 +206,7 @@ class SpannerTransactionWriterDoFn extends DoFn<FailsafeElement<String, String>,
   /** Setup function connects to Cloud Spanner. */
   @Setup
   public void setup() {
+    // SpannerConfig failureInjectedSpannerConfig = spannerConfig.toBuilder().setServiceFactory(new FailureInjectedSpannerService()).build();
     spannerAccessor = SpannerAccessor.getOrCreate(spannerConfig);
     shadowTableSpannerAccessor =
         usesSeparateShadowTableDb

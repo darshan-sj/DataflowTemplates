@@ -46,8 +46,6 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.beam.runners.dataflow.options.DataflowWorkerHarnessOptions;
-import com.google.cloud.teleport.v2.templates.SpannerAccessor;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;

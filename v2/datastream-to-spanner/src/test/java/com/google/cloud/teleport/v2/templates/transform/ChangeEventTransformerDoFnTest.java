@@ -45,13 +45,13 @@ import com.google.cloud.teleport.v2.spanner.migrations.transformation.Transforma
 import com.google.cloud.teleport.v2.spanner.utils.ISpannerMigrationTransformer;
 import com.google.cloud.teleport.v2.spanner.utils.MigrationTransformationRequest;
 import com.google.cloud.teleport.v2.spanner.utils.MigrationTransformationResponse;
+import com.google.cloud.teleport.v2.templates.SpannerAccessor;
+import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import com.google.cloud.teleport.v2.templates.constants.DatastreamToSpannerConstants;
 import com.google.cloud.teleport.v2.templates.datastream.DatastreamConstants;
 import com.google.cloud.teleport.v2.values.FailsafeElement;
 import java.util.HashMap;
 import java.util.Map;
-import com.google.cloud.teleport.v2.templates.SpannerAccessor;
-import com.google.cloud.teleport.v2.templates.SpannerConfig;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.PCollectionView;
 import org.junit.Test;
