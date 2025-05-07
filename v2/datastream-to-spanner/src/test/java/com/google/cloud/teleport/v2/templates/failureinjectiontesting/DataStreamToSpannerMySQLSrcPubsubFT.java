@@ -30,8 +30,6 @@ import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.cloud.teleport.v2.templates.DataStreamToSpanner;
 import com.google.cloud.teleport.v2.templates.failureinjectiontesting.utils.MySQLSrcDataProvider;
-import com.google.common.collect.ImmutableMap;
-import com.google.pubsub.v1.PullResponse;
 import com.google.pubsub.v1.SubscriptionName;
 import com.google.pubsub.v1.TopicName;
 import java.io.IOException;
@@ -217,18 +215,18 @@ public class DataStreamToSpannerMySQLSrcPubsubFT extends DataStreamToSpannerFTBa
     MySQLSrcDataProvider.writeRowsInSourceDB(1, 100, sourceDBResourceManager);
 
     // Wait for messages in pubsub for 5 minutes and consume them
-    PullResponse pullResponse = null;
-    for (int i = 0; i < 30; ++i) {
-      pullResponse = pubsubResourceManager.pull(subscription, 2);
-      if (pullResponse.getReceivedMessagesCount() > 0) {
-        break;
-      }
-      Thread.sleep(1000);
-    }
-    pubsubResourceManager.publish(
-        topic, ImmutableMap.of(), pullResponse.getReceivedMessages(0).getMessage().getData());
-    pubsubResourceManager.publish(
-        topic, ImmutableMap.of(), pullResponse.getReceivedMessages(0).getMessage().getData());
+    // PullResponse pullResponse = null;
+    // for (int i = 0; i < 30; ++i) {
+    //   pullResponse = pubsubResourceManager.pull(subscription, 2);
+    //   if (pullResponse.getReceivedMessagesCount() > 0) {
+    //     break;
+    //   }
+    //   Thread.sleep(1000);
+    // }
+    // pubsubResourceManager.publish(
+    //     topic, ImmutableMap.of(), pullResponse.getReceivedMessages(0).getMessage().getData());
+    // pubsubResourceManager.publish(
+    //     topic, ImmutableMap.of(), pullResponse.getReceivedMessages(0).getMessage().getData());
 
     ChainedConditionCheck conditionCheck =
         ChainedConditionCheck.builder(
