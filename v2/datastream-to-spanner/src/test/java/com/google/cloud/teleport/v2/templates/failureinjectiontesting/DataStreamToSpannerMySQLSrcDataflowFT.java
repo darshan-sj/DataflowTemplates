@@ -19,7 +19,12 @@ import static com.google.cloud.teleport.v2.templates.failureinjectiontesting.uti
 import static com.google.cloud.teleport.v2.templates.failureinjectiontesting.utils.MySQLSrcDataProvider.BOOKS_TABLE;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatPipeline;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatResult;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.google.cloud.logging.Payload;
+import com.google.cloud.logging.Severity;
 import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.cloud.teleport.v2.templates.DataStreamToSpanner;
@@ -27,10 +32,14 @@ import com.google.cloud.teleport.v2.templates.failureinjectiontesting.utils.Data
 import com.google.cloud.teleport.v2.templates.failureinjectiontesting.utils.MySQLSrcDataProvider;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import org.apache.beam.it.common.PipelineLauncher;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.beam.it.common.PipelineLauncher.LaunchInfo;
 import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
 import org.apache.beam.it.conditions.ChainedConditionCheck;
@@ -38,11 +47,12 @@ import org.apache.beam.it.conditions.ConditionCheck;
 import org.apache.beam.it.gcp.cloudsql.CloudSqlResourceManager;
 import org.apache.beam.it.gcp.dataflow.FlexTemplateDataflowJobResourceManager;
 import org.apache.beam.it.gcp.datastream.JDBCSource;
+import org.apache.beam.it.gcp.logging.LoggingClient;
 import org.apache.beam.it.gcp.pubsub.PubsubResourceManager;
 import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
 import org.apache.beam.it.gcp.spanner.conditions.SpannerRowsCheck;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -66,12 +76,13 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
   private static final String SPANNER_DDL_RESOURCE =
       "SpannerFailureInjectionTesting/spanner-schema.sql";
 
-  private static PipelineLauncher.LaunchInfo jobInfo;
   public static SpannerResourceManager spannerResourceManager;
   private static GcsResourceManager gcsResourceManager;
   private static PubsubResourceManager pubsubResourceManager;
 
   private static CloudSqlResourceManager sourceDBResourceManager;
+
+  private static HashSet<DataStreamToSpannerMySQLSrcDataflowFT> testInstances = new HashSet<>();
   private JDBCSource sourceConnectionProfile;
 
   /**
@@ -81,34 +92,29 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
    */
   @Before
   public void setUp() throws IOException, InterruptedException {
-    // create Spanner Resources
-    spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
+    skipBaseCleanup = true;
+    synchronized (DataStreamToSpannerMySQLSrcDataflowFT.class) {
+      testInstances.add(this);
+      if (pubsubResourceManager == null) {
+        // create Spanner Resources
+        spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
 
-    // create Source Resources
-    sourceDBResourceManager = MySQLSrcDataProvider.createSourceResourceManagerWithSchema(testName);
-    sourceConnectionProfile =
-        createMySQLSourceConnectionProfile(
-            sourceDBResourceManager, Arrays.asList(AUTHORS_TABLE, BOOKS_TABLE));
+        // create Source Resources
+        sourceDBResourceManager = MySQLSrcDataProvider.createSourceResourceManagerWithSchema(
+            testName);
+        sourceConnectionProfile =
+            createMySQLSourceConnectionProfile(
+                sourceDBResourceManager, Arrays.asList(AUTHORS_TABLE, BOOKS_TABLE));
 
-    // create and upload GCS Resources
-    gcsResourceManager =
-        GcsResourceManager.builder(artifactBucketName, getClass().getSimpleName(), credentials)
-            .build();
+        // create and upload GCS Resources
+        gcsResourceManager =
+            GcsResourceManager.builder(artifactBucketName, getClass().getSimpleName(), credentials)
+                .build();
 
-    // create pubsub manager
-    pubsubResourceManager = setUpPubSubResourceManager();
-
-    FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
-        FlexTemplateDataflowJobResourceManager.builder(testName);
-
-    // launch forward migration template
-    jobInfo =
-        launchFwdDataflowJob(
-            spannerResourceManager,
-            gcsResourceManager,
-            pubsubResourceManager,
-            flexTemplateBuilder,
-            sourceConnectionProfile);
+        // create pubsub manager
+        pubsubResourceManager = setUpPubSubResourceManager();
+      }
+    }
   }
 
   /**
@@ -116,8 +122,11 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
    *
    * @throws IOException
    */
-  @After
-  public void cleanUp() throws IOException {
+  @AfterClass
+  public static void cleanUp() throws IOException {
+    for (DataStreamToSpannerMySQLSrcDataflowFT instance : testInstances) {
+      instance.tearDownBase();
+    }
     ResourceManagerUtils.cleanResources(
         spannerResourceManager, gcsResourceManager, pubsubResourceManager, sourceDBResourceManager);
   }
@@ -125,6 +134,18 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
   @Test
   public void dataflowWorkerFailureTest()
       throws IOException, ExecutionException, InterruptedException {
+
+    FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
+        FlexTemplateDataflowJobResourceManager.builder(testName);
+
+    // launch forward migration template
+    LaunchInfo jobInfo = launchFwdDataflowJob(
+        spannerResourceManager,
+        gcsResourceManager,
+        pubsubResourceManager,
+        flexTemplateBuilder,
+        sourceConnectionProfile);
+
     // Wait for Forward migration job to be in running state
     assertThatPipeline(jobInfo).isRunning();
 
@@ -164,5 +185,54 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
             .waitForConditionAndCancel(
                 createConfig(jobInfo, Duration.ofMinutes(20)), conditionCheck);
     assertThatResult(result).meetsConditions();
+  }
+
+  @Test
+  public void dataflowWorkerQuotaTest() throws IOException, InterruptedException {
+
+    FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
+        FlexTemplateDataflowJobResourceManager.builder(testName);
+
+    try {
+      LaunchInfo jobInfo = launchFwdDataflowJob(
+          spannerResourceManager,
+          gcsResourceManager,
+          pubsubResourceManager,
+          flexTemplateBuilder,
+          sourceConnectionProfile);
+      fail("Expected launch job to fail but it succeeded");
+    } catch (RuntimeException e) {
+      String jobId = extractJobIdFromError(e.getMessage());
+      assertNotNull(jobId);
+      LoggingClient loggingClient =
+          LoggingClient.builder(credentials).setProjectId(PROJECT).build();
+      String filter =
+          String.format(" \"Workflow failed. Causes: Project %s has insufficient resource(s) to execute this workflow\" ", PROJECT);
+      Instant startTime = Instant.now();
+      Instant endTime = startTime.plus(Duration.ofMinutes(15L));
+      Boolean errorLogFound = false;
+      while (!errorLogFound && Instant.now().isBefore(endTime)) {
+        List<Payload> logs = loggingClient.readJobLogs(jobId, filter, Severity.ERROR, 2);
+        if (logs.size() > 0) {
+          errorLogFound = true;
+        }
+        Thread.sleep(15 * 1000);
+      }
+      assertTrue(
+          "Could not find Expected dataflow job log: Insufficient resources", errorLogFound);
+    }
+  }
+
+  private String extractJobIdFromError(String message) {
+    Pattern pattern =
+        Pattern.compile(
+            "https://console.cloud.google.com/dataflow/jobs/([^/]+)/([^/?]+)(\\?project=([^&]+))?");
+    Matcher matcher = pattern.matcher(message);
+    if (matcher.find()) {
+      // Group 2 contains the jobId
+      return matcher.group(2);
+    } else {
+      return null;
+    }
   }
 }
