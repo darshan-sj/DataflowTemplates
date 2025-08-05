@@ -39,6 +39,7 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
       LoggerFactory.getLogger(FlexTemplateDataflowJobResourceManager.class);
   private Map<String, String> parameters;
   private String templateName;
+  private String region;
   private PipelineLauncher.LaunchInfo jobInfo;
   private final LaunchConfig launchConfig;
   private final PipelineLauncher pipelineLauncher;
@@ -52,6 +53,10 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
     this.parameters = builder.parameters;
     this.templateName = builder.templateName;
     pipelineLauncher = FlexTemplateClient.builder(CREDENTIALS).build();
+    this.region = REGION;
+    if (builder.region != null) {
+      this.region = builder.region;
+    }
     synchronized (specPaths) {
       if (!specPaths.containsKey(builder.templateName)) {
         buildAndStageTemplate(
@@ -78,7 +83,7 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
    * @return the jobInfo object
    */
   public PipelineLauncher.LaunchInfo launchJob() throws IOException {
-    LaunchInfo launchInfo = pipelineLauncher.launch(PROJECT, REGION, launchConfig);
+    LaunchInfo launchInfo = pipelineLauncher.launch(PROJECT, region, launchConfig);
     LOG.info("Dataflow job started");
     this.jobInfo = launchInfo;
     if (launchInfo.jobId() != null && !launchInfo.jobId().isEmpty()) {
@@ -114,6 +119,7 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
     private String templateName;
     private String templateModulePath;
     private String additionalMavenProfile;
+    private String region;
 
     private Builder(String jobName) {
       this.jobName = jobName;
@@ -127,6 +133,10 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
 
     public Map<String, String> getParameters() {
       return parameters;
+    }
+
+    public String getRegion() {
+      return region;
     }
 
     public FlexTemplateDataflowJobResourceManager.Builder addParameter(String key, String value) {
@@ -154,6 +164,12 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
     public FlexTemplateDataflowJobResourceManager.Builder withAdditionalMavenProfile(
         String profile) {
       this.additionalMavenProfile = profile;
+      return this;
+    }
+
+    public FlexTemplateDataflowJobResourceManager.Builder withRegion(
+        String region) {
+      this.region = region;
       return this;
     }
 

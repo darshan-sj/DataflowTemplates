@@ -156,6 +156,18 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
       FlexTemplateDataflowJobResourceManager.Builder flexTemplateDataflowJobResourceManagerBuilder,
       JDBCSource sourceConnectionProfile)
       throws IOException {
+    return launchFwdDataflowJob(spannerResourceManager, gcsResourceManager, pubsubResourceManager, flexTemplateDataflowJobResourceManagerBuilder, sourceConnectionProfile, null, null);
+  }
+
+  public PipelineLauncher.LaunchInfo launchFwdDataflowJob(
+      SpannerResourceManager spannerResourceManager,
+      GcsResourceManager gcsResourceManager,
+      PubsubResourceManager pubsubResourceManager,
+      FlexTemplateDataflowJobResourceManager.Builder flexTemplateDataflowJobResourceManagerBuilder,
+      JDBCSource sourceConnectionProfile,
+      Map<String, String> paramOverrides,
+      Map<String, Object> environmentVariables)
+      throws IOException {
     String testRootDir = getClass().getSimpleName();
 
     // create subscriptions
@@ -194,7 +206,9 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
             dlqGcsPrefix,
             subscription.toString(),
             dlqSubscription.toString(),
-            flexTemplateDataflowJobResourceManagerBuilder);
+            flexTemplateDataflowJobResourceManagerBuilder,
+            paramOverrides,
+            environmentVariables);
     assertThatPipeline(jobInfo).isRunning();
     return jobInfo;
   }
@@ -206,13 +220,15 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
       String dlqGcsPrefix,
       String pubSubSubscription,
       String dlqPubSubSubscription,
-      FlexTemplateDataflowJobResourceManager.Builder flexTemplateDataflowJobResourceManagerBuilder)
+      FlexTemplateDataflowJobResourceManager.Builder flexTemplateDataflowJobResourceManagerBuilder,
+      Map<String, String> paramOverrides,
+      Map<String, Object> environmentVariables)
       throws IOException {
     String artifactBucket = TestProperties.artifactBucket();
 
     // launch dataflow template
-    FlexTemplateDataflowJobResourceManager flexTemplateDataflowJobResourceManager =
-        flexTemplateDataflowJobResourceManagerBuilder
+    // FlexTemplateDataflowJobResourceManager flexTemplateDataflowJobResourceManager =
+    flexTemplateDataflowJobResourceManagerBuilder = flexTemplateDataflowJobResourceManagerBuilder
             .withTemplateName("Cloud_Datastream_to_Spanner")
             .withTemplateModulePath("v2/datastream-to-spanner")
             .addParameter("inputFilePattern", getGcsPath(artifactBucket, gcsPrefix))
@@ -224,11 +240,23 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
             .addParameter("gcsPubSubSubscription", pubSubSubscription)
             .addParameter("dlqGcsPubSubSubscription", dlqPubSubSubscription)
             .addParameter("datastreamSourceType", "mysql")
-            .addParameter("inputFileFormat", "avro")
-            .build();
+            .addParameter("inputFileFormat", "avro");
+
+    if (paramOverrides != null) {
+      for (Map.Entry<String, String> param: paramOverrides.entrySet()) {
+        flexTemplateDataflowJobResourceManagerBuilder.addParameter(param.getKey(), param.getValue());
+      }
+    }
+
+    if (environmentVariables != null) {
+      for (Map.Entry<String, Object> environmentVar: environmentVariables.entrySet()) {
+        flexTemplateDataflowJobResourceManagerBuilder.addEnvironmentVariable(environmentVar.getKey(), environmentVar.getValue());
+      }
+    }
+
 
     // Run
-    PipelineLauncher.LaunchInfo jobInfo = flexTemplateDataflowJobResourceManager.launchJob();
+    PipelineLauncher.LaunchInfo jobInfo = flexTemplateDataflowJobResourceManagerBuilder.build().launchJob();
     return jobInfo;
   }
 

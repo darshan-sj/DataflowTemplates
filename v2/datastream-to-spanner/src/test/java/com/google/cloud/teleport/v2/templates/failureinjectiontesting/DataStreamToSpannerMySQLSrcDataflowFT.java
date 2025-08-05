@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -191,7 +192,16 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
   public void dataflowWorkerQuotaTest() throws IOException, InterruptedException {
 
     FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
-        FlexTemplateDataflowJobResourceManager.builder(testName);
+        FlexTemplateDataflowJobResourceManager.builder(testName)
+            .withRegion("us-west8");
+
+    Map<String, String> params = Map.of(
+        "workerMachineType", "n2-standard-2"
+    );
+
+    Map<String, Object> environmentVars = Map.of(
+        "workerRegion", "us-west8"
+    );
 
     try {
       LaunchInfo jobInfo = launchFwdDataflowJob(
@@ -199,7 +209,9 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
           gcsResourceManager,
           pubsubResourceManager,
           flexTemplateBuilder,
-          sourceConnectionProfile);
+          sourceConnectionProfile,
+          params,
+          environmentVars);
       fail("Expected launch job to fail but it succeeded");
     } catch (RuntimeException e) {
       String jobId = extractJobIdFromError(e.getMessage());
