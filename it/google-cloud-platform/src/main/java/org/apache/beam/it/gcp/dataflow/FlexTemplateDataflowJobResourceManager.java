@@ -167,8 +167,7 @@ public class FlexTemplateDataflowJobResourceManager implements ResourceManager {
       return this;
     }
 
-    public FlexTemplateDataflowJobResourceManager.Builder withRegion(
-        String region) {
+    public FlexTemplateDataflowJobResourceManager.Builder withRegion(String region) {
       this.region = region;
       return this;
     }

@@ -101,8 +101,8 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
         spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
 
         // create Source Resources
-        sourceDBResourceManager = MySQLSrcDataProvider.createSourceResourceManagerWithSchema(
-            testName);
+        sourceDBResourceManager =
+            MySQLSrcDataProvider.createSourceResourceManagerWithSchema(testName);
         sourceConnectionProfile =
             createMySQLSourceConnectionProfile(
                 sourceDBResourceManager, Arrays.asList(AUTHORS_TABLE, BOOKS_TABLE));
@@ -140,12 +140,13 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
         FlexTemplateDataflowJobResourceManager.builder(testName);
 
     // launch forward migration template
-    LaunchInfo jobInfo = launchFwdDataflowJob(
-        spannerResourceManager,
-        gcsResourceManager,
-        pubsubResourceManager,
-        flexTemplateBuilder,
-        sourceConnectionProfile);
+    LaunchInfo jobInfo =
+        launchFwdDataflowJob(
+            spannerResourceManager,
+            gcsResourceManager,
+            pubsubResourceManager,
+            flexTemplateBuilder,
+            sourceConnectionProfile);
 
     // Wait for Forward migration job to be in running state
     assertThatPipeline(jobInfo).isRunning();
@@ -192,26 +193,22 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
   public void dataflowWorkerQuotaTest() throws IOException, InterruptedException {
 
     FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
-        FlexTemplateDataflowJobResourceManager.builder(testName)
-            .withRegion("us-west8");
+        FlexTemplateDataflowJobResourceManager.builder(testName).withRegion("us-west8");
 
-    Map<String, String> params = Map.of(
-        "workerMachineType", "n2-standard-2"
-    );
+    Map<String, String> params = Map.of("workerMachineType", "n2-standard-2");
 
-    Map<String, Object> environmentVars = Map.of(
-        "workerRegion", "us-west8"
-    );
+    Map<String, Object> environmentVars = Map.of("workerRegion", "us-west8");
 
     try {
-      LaunchInfo jobInfo = launchFwdDataflowJob(
-          spannerResourceManager,
-          gcsResourceManager,
-          pubsubResourceManager,
-          flexTemplateBuilder,
-          sourceConnectionProfile,
-          params,
-          environmentVars);
+      LaunchInfo jobInfo =
+          launchFwdDataflowJob(
+              spannerResourceManager,
+              gcsResourceManager,
+              pubsubResourceManager,
+              flexTemplateBuilder,
+              sourceConnectionProfile,
+              params,
+              environmentVars);
       fail("Expected launch job to fail but it succeeded");
     } catch (RuntimeException e) {
       String jobId = extractJobIdFromError(e.getMessage());
@@ -219,7 +216,9 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
       LoggingClient loggingClient =
           LoggingClient.builder(credentials).setProjectId(PROJECT).build();
       String filter =
-          String.format(" \"Workflow failed. Causes: Project %s has insufficient resource(s) to execute this workflow\" ", PROJECT);
+          String.format(
+              " \"Workflow failed. Causes: Project %s has insufficient resource(s) to execute this workflow\" ",
+              PROJECT);
       Instant startTime = Instant.now();
       Instant endTime = startTime.plus(Duration.ofMinutes(15L));
       Boolean errorLogFound = false;
@@ -230,8 +229,7 @@ public class DataStreamToSpannerMySQLSrcDataflowFT extends DataStreamToSpannerFT
         }
         Thread.sleep(15 * 1000);
       }
-      assertTrue(
-          "Could not find Expected dataflow job log: Insufficient resources", errorLogFound);
+      assertTrue("Could not find Expected dataflow job log: Insufficient resources", errorLogFound);
     }
   }
 

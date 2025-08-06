@@ -156,7 +156,14 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
       FlexTemplateDataflowJobResourceManager.Builder flexTemplateDataflowJobResourceManagerBuilder,
       JDBCSource sourceConnectionProfile)
       throws IOException {
-    return launchFwdDataflowJob(spannerResourceManager, gcsResourceManager, pubsubResourceManager, flexTemplateDataflowJobResourceManagerBuilder, sourceConnectionProfile, null, null);
+    return launchFwdDataflowJob(
+        spannerResourceManager,
+        gcsResourceManager,
+        pubsubResourceManager,
+        flexTemplateDataflowJobResourceManagerBuilder,
+        sourceConnectionProfile,
+        null,
+        null);
   }
 
   public PipelineLauncher.LaunchInfo launchFwdDataflowJob(
@@ -228,7 +235,8 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
 
     // launch dataflow template
     // FlexTemplateDataflowJobResourceManager flexTemplateDataflowJobResourceManager =
-    flexTemplateDataflowJobResourceManagerBuilder = flexTemplateDataflowJobResourceManagerBuilder
+    flexTemplateDataflowJobResourceManagerBuilder =
+        flexTemplateDataflowJobResourceManagerBuilder
             .withTemplateName("Cloud_Datastream_to_Spanner")
             .withTemplateModulePath("v2/datastream-to-spanner")
             .addParameter("inputFilePattern", getGcsPath(artifactBucket, gcsPrefix))
@@ -243,20 +251,22 @@ public abstract class DataStreamToSpannerFTBase extends TemplateTestBase {
             .addParameter("inputFileFormat", "avro");
 
     if (paramOverrides != null) {
-      for (Map.Entry<String, String> param: paramOverrides.entrySet()) {
-        flexTemplateDataflowJobResourceManagerBuilder.addParameter(param.getKey(), param.getValue());
+      for (Map.Entry<String, String> param : paramOverrides.entrySet()) {
+        flexTemplateDataflowJobResourceManagerBuilder.addParameter(
+            param.getKey(), param.getValue());
       }
     }
 
     if (environmentVariables != null) {
-      for (Map.Entry<String, Object> environmentVar: environmentVariables.entrySet()) {
-        flexTemplateDataflowJobResourceManagerBuilder.addEnvironmentVariable(environmentVar.getKey(), environmentVar.getValue());
+      for (Map.Entry<String, Object> environmentVar : environmentVariables.entrySet()) {
+        flexTemplateDataflowJobResourceManagerBuilder.addEnvironmentVariable(
+            environmentVar.getKey(), environmentVar.getValue());
       }
     }
 
-
     // Run
-    PipelineLauncher.LaunchInfo jobInfo = flexTemplateDataflowJobResourceManagerBuilder.build().launchJob();
+    PipelineLauncher.LaunchInfo jobInfo =
+        flexTemplateDataflowJobResourceManagerBuilder.build().launchJob();
     return jobInfo;
   }
 
