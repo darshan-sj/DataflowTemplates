@@ -91,7 +91,9 @@ public class SrcDbToSpannerMySQLSpannerFT extends SourceDbToSpannerFTBase {
             "failureInjectionTest",
             Map.of(
                 "failureInjectionParameter",
-                "{\"policyType\":\"InitialLimitedDurationErrorInjectionPolicy\", \"duration\": \"PT5M\"}"),
+                "{\"policyType\":\"InitialLimitedDurationErrorInjectionPolicy\", \"duration\": \"PT5M\"}",
+                "batchSizeForSpannerMutations",
+                "10"),
             spannerResourceManager,
             gcsResourceManager,
             sourceDBResourceManager);
