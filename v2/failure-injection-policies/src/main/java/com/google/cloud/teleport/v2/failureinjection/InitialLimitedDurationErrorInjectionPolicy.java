@@ -40,9 +40,11 @@ public class InitialLimitedDurationErrorInjectionPolicy
   private final Duration injectionDuration;
   private final String effectiveDurationParameter;
   private Clock clock;
+  private long callCount;
 
   private static final String DEFAULT_DURATION = "PT10M";
   private static final String DURATION_FIELD_IN_OBJECT = "duration";
+  private static final long INITIAL_ALLOWED_CALLS_COUNT = 20;
 
   public InitialLimitedDurationErrorInjectionPolicy(JsonNode inputParameter) {
     this(inputParameter, Clock.systemUTC());
@@ -117,6 +119,13 @@ public class InitialLimitedDurationErrorInjectionPolicy
               this.startTime);
         }
       }
+    }
+    synchronized (this) {
+      ++callCount;
+    }
+
+    if (callCount < INITIAL_ALLOWED_CALLS_COUNT) {
+      return false;
     }
 
     Instant now = Instant.now(clock);
