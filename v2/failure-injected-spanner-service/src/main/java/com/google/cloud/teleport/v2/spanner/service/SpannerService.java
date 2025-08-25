@@ -92,6 +92,12 @@ public class SpannerService implements ServiceFactory<Spanner, SpannerOptions>, 
                   if (errorInjected.get()) {
                     // Return an error as if it has been sent from Spanner.
                     status = Status.DEADLINE_EXCEEDED.augmentDescription("INJECTED BY TEST");
+                    if (errorInjectionPolicy.getErrorCodeToBeInjected() != null) {
+                      status =
+                          errorInjectionPolicy
+                              .getErrorCodeToBeInjected()
+                              .augmentDescription("INJECTED BY TEST");
+                    }
                   }
                   super.onClose(status, metadata);
                 }

@@ -15,6 +15,12 @@
  */
 package com.google.cloud.teleport.v2.failureinjection;
 
+import io.grpc.Status;
+
 public interface ErrorInjectionPolicy {
   boolean shouldInjectionError();
+
+  default Status getErrorCodeToBeInjected() {
+    return null;
+  }
 }
