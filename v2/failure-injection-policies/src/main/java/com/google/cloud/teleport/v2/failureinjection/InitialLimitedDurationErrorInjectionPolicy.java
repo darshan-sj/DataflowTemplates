@@ -16,7 +16,6 @@
 package com.google.cloud.teleport.v2.failureinjection;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.grpc.Status;
 import io.grpc.Status.Code;
 import java.io.Serializable;
 import java.time.Clock;
@@ -41,7 +40,7 @@ public class InitialLimitedDurationErrorInjectionPolicy
   private Instant startTime;
   private final Duration injectionDuration;
   private final String effectiveDurationParameter;
-  private Status errorCodeToBeInjected;
+  private String errorCodeToBeInjected;
   private Clock clock;
   private long callCount;
 
@@ -89,17 +88,12 @@ public class InitialLimitedDurationErrorInjectionPolicy
         if (errorCodePath.isTextual()) {
           String textValue = errorCodePath.asText();
           if (textValue != null && !textValue.isBlank()) {
-            try {
-              errorCodeToBeInjected = Status.fromCode(Code.valueOf(textValue));
-            } catch (IllegalArgumentException e) {
-              errorCodeToBeInjected = Status.DEADLINE_EXCEEDED;
-            }
+            errorCodeToBeInjected = textValue;
           } else {
             LOG.warn(
                 "Received object input with blank text in field '{}'. Using default: {}",
                 ERROR_CODE_IN_OBJECT,
                 Code.DEADLINE_EXCEEDED);
-            errorCodeToBeInjected = Status.DEADLINE_EXCEEDED;
           }
         }
       }
@@ -172,7 +166,7 @@ public class InitialLimitedDurationErrorInjectionPolicy
   }
 
   @Override
-  public Status getErrorCodeToBeInjected() {
+  public String getErrorCodeToBeInjected() {
     return errorCodeToBeInjected;
   }
 
