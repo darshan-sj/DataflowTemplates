@@ -44,7 +44,7 @@ public class InitialLimitedDurationErrorInjectionPolicy
 
   private static final String DEFAULT_DURATION = "PT10M";
   private static final String DURATION_FIELD_IN_OBJECT = "duration";
-  private static final long INITIAL_ALLOWED_CALLS_COUNT = 20;
+  private static final long INITIAL_ALLOWED_CALLS_COUNT = 2;
 
   public InitialLimitedDurationErrorInjectionPolicy(JsonNode inputParameter) {
     this(inputParameter, Clock.systemUTC());
