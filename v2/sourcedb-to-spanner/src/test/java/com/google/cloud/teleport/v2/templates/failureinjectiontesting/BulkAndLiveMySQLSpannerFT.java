@@ -93,7 +93,7 @@ public class BulkAndLiveMySQLSpannerFT extends SourceDbToSpannerFTBase {
             .build();
 
     // Insert data for bulk before launching the job
-    MySQLSrcDataProvider.writeAuthorRowsInSourceDB(1, 200, sourceDBResourceManager);
+    MySQLSrcDataProvider.writeRowsInSourceDB(1, 200, sourceDBResourceManager);
 
     // create pubsub manager
     pubsubResourceManager = setUpPubSubResourceManager();
@@ -137,7 +137,7 @@ public class BulkAndLiveMySQLSpannerFT extends SourceDbToSpannerFTBase {
                 List.of(AUTHORS_TABLE, BOOKS_TABLE),
                 gcsResourceManager,
                 "output/dlq/severe/",
-                200)
+                400)
             .and(
                 // There should be at least 1 error
                 DlqEventsCountCheck.builder(gcsResourceManager, "output/dlq/severe/")
@@ -169,11 +169,11 @@ public class BulkAndLiveMySQLSpannerFT extends SourceDbToSpannerFTBase {
                     SpannerRowsCheck.builder(spannerResourceManager, AUTHORS_TABLE)
                         .setMinRows(200)
                         .setMaxRows(200)
+                        .build(),
+                    SpannerRowsCheck.builder(spannerResourceManager, BOOKS_TABLE)
+                        .setMinRows(200)
+                        .setMaxRows(200)
                         .build()))
-            // SpannerRowsCheck.builder(spannerResourceManager, BOOKS_TABLE)
-            //     .setMinRows(200)
-            //     .setMaxRows(200)
-            //     .build()))
             .build();
 
     result =
