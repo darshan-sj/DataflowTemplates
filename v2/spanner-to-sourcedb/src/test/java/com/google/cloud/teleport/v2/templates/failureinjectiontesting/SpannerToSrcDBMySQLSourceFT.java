@@ -105,7 +105,7 @@ public class SpannerToSrcDBMySQLSourceFT extends SpannerToSourceDbFTBase {
 
     // create network failure injector
     networkFailureInjector =
-        NetworkFailureInjector.builder(PROJECT, "nokill-failure-testing-mysql-source-vpc").build();
+        NetworkFailureInjector.builder(PROJECT, "default").build();
 
     // launch reverse migration template
     jobInfo =
