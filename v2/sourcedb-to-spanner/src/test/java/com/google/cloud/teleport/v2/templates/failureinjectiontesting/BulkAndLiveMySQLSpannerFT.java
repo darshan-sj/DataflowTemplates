@@ -19,21 +19,26 @@ import static com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontes
 import static com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontesting.MySQLSrcDataProvider.BOOKS_TABLE;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatPipeline;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatResult;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontesting.MySQLSrcDataProvider;
 import com.google.cloud.teleport.v2.templates.SourceDbToSpanner;
+import com.google.pubsub.v1.SubscriptionName;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import org.apache.beam.it.common.PipelineLauncher;
 import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
+import org.apache.beam.it.conditions.ChainedConditionCheck;
 import org.apache.beam.it.conditions.ConditionCheck;
 import org.apache.beam.it.gcp.cloudsql.CloudSqlResourceManager;
+import org.apache.beam.it.gcp.datastream.conditions.DlqEventsCountCheck;
+import org.apache.beam.it.gcp.pubsub.PubsubResourceManager;
 import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
+import org.apache.beam.it.gcp.spanner.conditions.SpannerRowsCheck;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
 import org.junit.After;
 import org.junit.Before;
@@ -45,23 +50,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A failure injection test for the SourceDB to Spanner template. This test injects Spanner errors
- * and checks the template behaviour.
+ * A failure injection test for Bulk + retry DLQ Live migration i.e., SourceDbToSpanner and
+ * DataStreamToSpanner templates. The bulk migration template does not retry transient failures.
+ * Live migration template is used to retry the failures which happened during the Bulk migration.
+ * This test injects Spanner errors to simulate transient errors during Bulk migration and checks
+ * the template behaviour.
  */
 @Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @TemplateIntegrationTest(SourceDbToSpanner.class)
 @RunWith(JUnit4.class)
-public class SrcDbToSpannerMySQLSpannerFT extends SourceDbToSpannerFTBase {
+public class BulkAndLiveMySQLSpannerFT extends SourceDbToSpannerFTBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(BulkAndLiveMySQLSpannerFT.class);
   private static final String SPANNER_DDL_RESOURCE =
-      "SpannerFailureInjectionTesting/spanner-schema.sql";
+      "SpannerFailureInjectionTesting/spanner-schema-small-author-name.sql";
 
-  private static PipelineLauncher.LaunchInfo jobInfo;
+  private static PipelineLauncher.LaunchInfo bulkJobInfo;
   public static SpannerResourceManager spannerResourceManager;
   private static GcsResourceManager gcsResourceManager;
-
   private static CloudSqlResourceManager sourceDBResourceManager;
+  private static PipelineLauncher.LaunchInfo retryLiveJobInfo;
+  private static PubsubResourceManager pubsubResourceManager;
+  private static String bulkErrorFolderFullPath;
 
   /**
    * Setup resource managers and Launch dataflow job once during the execution of this test class.
@@ -70,6 +80,7 @@ public class SrcDbToSpannerMySQLSpannerFT extends SourceDbToSpannerFTBase {
    */
   @Before
   public void setUp() throws IOException, InterruptedException {
+    super.skipBaseCleanup = true;
     // create Spanner Resources
     spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
 
@@ -81,19 +92,18 @@ public class SrcDbToSpannerMySQLSpannerFT extends SourceDbToSpannerFTBase {
         GcsResourceManager.builder(artifactBucketName, getClass().getSimpleName(), credentials)
             .build();
 
-    // Insert data before launching the job
-    MySQLSrcDataProvider.writeRowsInSourceDB(1, 200, sourceDBResourceManager);
+    // Insert data for bulk before launching the job
+    MySQLSrcDataProvider.writeAuthorRowsInSourceDB(1, 200, sourceDBResourceManager);
 
-    // launch forward migration template
-    jobInfo =
+    // create pubsub manager
+    pubsubResourceManager = setUpPubSubResourceManager();
+
+    bulkErrorFolderFullPath = getGcsPath("output", gcsResourceManager);
+
+    // launch bulk migration
+    bulkJobInfo =
         launchBulkDataflowJob(
             getClass().getSimpleName(),
-            "failureInjectionTest",
-            Map.of(
-                "failureInjectionParameter",
-                "{\"policyType\":\"InitialLimitedDurationErrorInjectionPolicy\", \"policyInput\": { \"duration\": \"PT5M\", \"errorCode\": \"FAILED_PRECONDITION\" }}",
-                "batchSizeForSpannerMutations",
-                "50"),
             spannerResourceManager,
             gcsResourceManager,
             sourceDBResourceManager);
@@ -107,26 +117,69 @@ public class SrcDbToSpannerMySQLSpannerFT extends SourceDbToSpannerFTBase {
   @After
   public void cleanUp() throws IOException {
     ResourceManagerUtils.cleanResources(
-        spannerResourceManager, gcsResourceManager, sourceDBResourceManager);
+        spannerResourceManager, sourceDBResourceManager, pubsubResourceManager);
   }
 
   @Test
-  public void severeErrorFailureTest() {
+  public void bulkAndRetryDlqFailureTest() throws IOException {
 
     // Wait for Bulk migration job to be in running state
-    assertThatPipeline(jobInfo).isRunning();
-
-    ConditionCheck conditionCheck =
-        new TotalEventsProcessedCheck(
-            spannerResourceManager,
-            List.of(AUTHORS_TABLE, BOOKS_TABLE),
-            gcsResourceManager,
-            "output",
-            400);
+    assertThatPipeline(bulkJobInfo).isRunning();
 
     PipelineOperator.Result result =
+        pipelineOperator().waitUntilDone(createConfig(bulkJobInfo, Duration.ofMinutes(20)));
+    assertThatResult(result).isLaunchFinished();
+
+    ConditionCheck conditionCheck =
+        // Total events = successfully processed events + errors in output folder
+        new TotalEventsProcessedCheck(
+                spannerResourceManager,
+                List.of(AUTHORS_TABLE, BOOKS_TABLE),
+                gcsResourceManager,
+                "output/dlq/severe/",
+                200)
+            .and(
+                // There should be at least 1 error
+                DlqEventsCountCheck.builder(gcsResourceManager, "output/dlq/severe/")
+                    .setMinEvents(1)
+                    .build());
+
+    assertTrue(conditionCheck.get());
+
+    // Correct spanner schema
+    spannerResourceManager.executeDdlStatement(
+        "ALTER TABLE `Authors` ALTER COLUMN `name` STRING(200)");
+
+    String dlqGcsPrefix = bulkErrorFolderFullPath.replace("gs://" + artifactBucketName, "");
+    SubscriptionName dlqSubscription =
+        createPubsubResources(
+            testName + "dlq", pubsubResourceManager, dlqGcsPrefix, gcsResourceManager);
+
+    // launch forward migration template in retryDLQ mode
+    retryLiveJobInfo =
+        launchFwdDataflowJobInRetryDlqMode(
+            spannerResourceManager,
+            bulkErrorFolderFullPath,
+            bulkErrorFolderFullPath + "/dlq",
+            dlqSubscription);
+
+    conditionCheck =
+        ChainedConditionCheck.builder(
+                List.of(
+                    SpannerRowsCheck.builder(spannerResourceManager, AUTHORS_TABLE)
+                        .setMinRows(200)
+                        .setMaxRows(200)
+                        .build()))
+            // SpannerRowsCheck.builder(spannerResourceManager, BOOKS_TABLE)
+            //     .setMinRows(200)
+            //     .setMaxRows(200)
+            //     .build()))
+            .build();
+
+    result =
         pipelineOperator()
-            .waitForCondition(createConfig(jobInfo, Duration.ofMinutes(20)), conditionCheck);
+            .waitForConditionAndCancel(
+                createConfig(retryLiveJobInfo, Duration.ofMinutes(8)), conditionCheck);
     assertThatResult(result).meetsConditions();
   }
 }
