@@ -90,8 +90,7 @@ public class MySQLSrcDbToSpannerSourceFT extends SourceDbToSpannerFTBase {
     MySQLSrcDataProvider.writeRowsInSourceDB(1, 1000, sourceDBResourceManager);
 
     // create network failure injector
-    networkFailureInjector =
-        NetworkFailureInjector.builder(PROJECT, "nokill-failure-testing-mysql-source-vpc").build();
+    networkFailureInjector = NetworkFailureInjector.builder(PROJECT, "default").build();
 
     // launch forward migration template
     jobInfo =
