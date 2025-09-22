@@ -34,9 +34,11 @@ import org.apache.beam.it.common.PipelineLauncher;
 import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
 import org.apache.beam.it.conditions.ConditionCheck;
+import org.apache.beam.it.gcp.cloudsql.CloudMySQLResourceManager;
 import org.apache.beam.it.gcp.cloudsql.CloudSqlResourceManager;
 import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
+import org.apache.beam.it.testcontainers.TestContainerResourceManager;
 import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
@@ -79,7 +81,8 @@ public class MySQLSrcDbToSpannerSourceFT extends SourceDbToSpannerFTBase {
     spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
 
     // create Source Resources
-    sourceDBResourceManager = MySQLSrcDataProvider.createSourceResourceManagerWithSchema(testName);
+    sourceDBResourceManager = (CloudMySQLResourceManager) CloudMySQLResourceManager.builder(testName).setHost("10.10.0.2").build();
+    MySQLSrcDataProvider.createTables(sourceDBResourceManager);
 
     // create and upload GCS Resources
     gcsResourceManager =

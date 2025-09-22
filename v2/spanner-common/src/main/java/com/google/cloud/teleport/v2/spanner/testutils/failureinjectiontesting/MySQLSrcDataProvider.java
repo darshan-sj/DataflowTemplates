@@ -49,10 +49,14 @@ public class MySQLSrcDataProvider {
   public static CloudSqlResourceManager createSourceResourceManagerWithSchema(String testName) {
     CloudSqlResourceManager cloudSqlResourceManager =
         CloudMySQLResourceManager.builder(testName).build();
-    cloudSqlResourceManager.createTable(
-        AUTHORS_TABLE, new JDBCSchema(AUTHOR_TABLE_COLUMNS, "author_id"));
-    cloudSqlResourceManager.createTable(BOOKS_TABLE, new JDBCSchema(BOOK_TABLE_COLUMNS, "book_id"));
+    createTables(cloudSqlResourceManager);
     return cloudSqlResourceManager;
+  }
+
+  public static void createTables(CloudSqlResourceManager resourceManager) {
+    resourceManager.createTable(
+        AUTHORS_TABLE, new JDBCSchema(AUTHOR_TABLE_COLUMNS, "author_id"));
+    resourceManager.createTable(BOOKS_TABLE, new JDBCSchema(BOOK_TABLE_COLUMNS, "book_id"));
   }
 
   public static void createForeignKeyConstraint(CloudSqlResourceManager cloudSqlResourceManager) {
