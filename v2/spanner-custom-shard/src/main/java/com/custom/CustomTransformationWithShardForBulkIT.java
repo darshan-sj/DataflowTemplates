@@ -136,7 +136,7 @@ public class CustomTransformationWithShardForBulkIT implements ISpannerMigration
         row.put("json_column", "{\"k1\": \"v1\", \"k2\": \"v2\"}");
       }
       MigrationTransformationResponse response = new MigrationTransformationResponse(row, false);
-      return response;
+      throw new InvalidTransformationException("TEST exception");
     }
     return new MigrationTransformationResponse(null, false);
   }

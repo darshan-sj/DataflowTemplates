@@ -66,6 +66,7 @@ public class MySQLCustomTransformationsNonShardedIT extends SourceDbToSpannerITB
   public void setUp() {
     mySQLResourceManager = setUpMySQLResourceManager();
     spannerResourceManager = setUpSpannerResourceManager();
+    skipBaseCleanup = true;
   }
 
   /** Cleanup dataflow job and all the resources and resource managers. */
