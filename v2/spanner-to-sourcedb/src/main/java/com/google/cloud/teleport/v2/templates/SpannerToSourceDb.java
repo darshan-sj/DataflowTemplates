@@ -755,7 +755,7 @@ public class SpannerToSourceDb {
             .setCoder(
                 KvCoder.of(
                     VarLongCoder.of(), SerializableCoder.of(TrimmedShardedDataChangeRecord.class)))
-            .apply("Reshuffle2", Reshuffle.of())
+            .apply("Reshuffle2", Reshuffle.viaRandomKey())
             .apply(
                 "Write to source",
                 new SourceWriterTransform(
