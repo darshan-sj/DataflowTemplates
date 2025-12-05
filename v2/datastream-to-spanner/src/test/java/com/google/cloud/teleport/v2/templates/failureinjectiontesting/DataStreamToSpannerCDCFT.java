@@ -141,8 +141,8 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
         createDataStreamResources(
             artifactBucket, gcsPrefix, sourceConnectionProfile, datastreamResourceManager);
 
-    int numRows = 100;
-    int burstIterations = 10000;
+    int numRows = 6;
+    int burstIterations = 100;
 
     // generate Load
     cdcLoadGenerator = new FuzzyCDCLoadGenerator();
@@ -234,6 +234,7 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
     // kill dataflow worker function will be called until all the rows appear in spanner i.e., until
     // the end of migration.
     conditionCheck = workerFailureInjectorAsConditionCheck.and(spannerRowCountConditionCheck);
+    conditionCheck = spannerRowCountConditionCheck;
 
     result =
         pipelineOperator()

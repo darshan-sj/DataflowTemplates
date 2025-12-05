@@ -100,7 +100,7 @@ public class InitialLimitedDurationDelayInjectionPolicy
       }
     }
 
-    return false;
+    return true;
   }
 
   private static Duration parseDuration(String durationStr, String fieldName) {

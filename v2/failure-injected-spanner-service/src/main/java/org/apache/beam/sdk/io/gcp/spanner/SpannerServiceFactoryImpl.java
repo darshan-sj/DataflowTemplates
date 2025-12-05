@@ -16,10 +16,14 @@
 package org.apache.beam.sdk.io.gcp.spanner;
 
 import com.google.cloud.teleport.v2.spanner.service.SpannerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpannerServiceFactoryImpl {
+    private static final Logger LOG = LoggerFactory.getLogger(SpannerServiceFactoryImpl.class);
   public static SpannerConfig createSpannerService(SpannerConfig spannerConfig, String parameter) {
     if (spannerConfig.getServiceFactory() == null) {
+        LOG.error("Injecting Failure injected Spanner service!!");
       spannerConfig = spannerConfig.withServiceFactory(new SpannerService(parameter));
     }
     return spannerConfig;
