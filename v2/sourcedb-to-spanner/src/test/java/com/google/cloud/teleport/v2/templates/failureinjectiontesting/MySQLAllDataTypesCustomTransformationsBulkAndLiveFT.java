@@ -345,15 +345,20 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     gcsClient.uploadArtifact(gcsPathPrefix + "/customTransformation.jar", jarPath);
   }
 
-  protected void loadSQLFileResource(org.apache.beam.it.jdbc.JDBCResourceManager jdbcResourceManager, String resourcePath)
+  protected void loadSQLFileResource(
+      org.apache.beam.it.jdbc.JDBCResourceManager jdbcResourceManager, String resourcePath)
       throws Exception {
     String sql =
         String.join(
-            " ", com.google.common.io.Resources.readLines(com.google.common.io.Resources.getResource(resourcePath), java.nio.charset.StandardCharsets.UTF_8));
+            " ",
+            com.google.common.io.Resources.readLines(
+                com.google.common.io.Resources.getResource(resourcePath),
+                java.nio.charset.StandardCharsets.UTF_8));
     loadSQLToJdbcResourceManager(jdbcResourceManager, sql);
   }
 
-  protected void loadSQLToJdbcResourceManager(org.apache.beam.it.jdbc.JDBCResourceManager jdbcResourceManager, String sql)
+  protected void loadSQLToJdbcResourceManager(
+      org.apache.beam.it.jdbc.JDBCResourceManager jdbcResourceManager, String sql)
       throws Exception {
     LOG.info("Loading sql to jdbc resource manager with uri: {}", jdbcResourceManager.getUri());
     try {
