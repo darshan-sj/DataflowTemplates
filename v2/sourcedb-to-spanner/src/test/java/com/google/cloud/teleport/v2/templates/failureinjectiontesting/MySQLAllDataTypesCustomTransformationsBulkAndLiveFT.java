@@ -369,7 +369,11 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
                 "additionalExperiments", Collections.singletonList("disable_runner_v2"));
 
     if (customTransformation != null) {
-      flexTemplateBuilder.addParameter("transformationJarPath", customTransformation.jarPath());
+      flexTemplateBuilder.addParameter(
+          "transformationJarPath",
+          getGcsPath(
+              "CustomTransformationAllTypes/" + customTransformation.jarPath(),
+              gcsResourceManager));
       flexTemplateBuilder.addParameter("transformationClassName", customTransformation.classPath());
       if (customTransformation.customParameters() != null) {
         flexTemplateBuilder.addParameter(
@@ -407,7 +411,11 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
             .addParameter("runMode", "retryDLQ");
 
     if (customTransformation != null) {
-      flexTemplateBuilder.addParameter("transformationJarPath", customTransformation.jarPath());
+      flexTemplateBuilder.addParameter(
+          "transformationJarPath",
+          getGcsPath(
+              "CustomTransformationAllTypes/" + customTransformation.jarPath(),
+              gcsResourceManager));
       flexTemplateBuilder.addParameter("transformationClassName", customTransformation.classPath());
       if (customTransformation.customParameters() != null) {
         flexTemplateBuilder.addParameter(
