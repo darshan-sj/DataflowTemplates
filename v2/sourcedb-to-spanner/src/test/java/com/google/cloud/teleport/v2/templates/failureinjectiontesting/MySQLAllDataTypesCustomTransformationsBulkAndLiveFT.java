@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.beam.it.common.PipelineLauncher;
 import org.apache.beam.it.common.PipelineOperator;
+import org.apache.beam.it.common.utils.IORedirectUtil;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
 import org.apache.beam.it.conditions.ChainedConditionCheck;
 import org.apache.beam.it.conditions.ConditionCheck;
@@ -429,10 +430,19 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
   public void createAndUploadJarToGcs(String gcsPathPrefix)
       throws IOException, InterruptedException {
-    // Note: The jar should be built before running the test using:
-    // mvn package -pl v2/spanner-custom-shard -am -DskipTests
-    String jarPath = "v2/spanner-custom-shard/target/spanner-custom-shard-1.0-SNAPSHOT.jar";
-    gcsClient.uploadArtifact(gcsPathPrefix + "/customTransformation.jar", jarPath);
+    String[] shellCommand = {"/bin/bash", "-c", "cd ../spanner-custom-shard"};
+
+    Process exec = Runtime.getRuntime().exec(shellCommand);
+
+    IORedirectUtil.redirectLinesLog(exec.getInputStream(), LOG);
+    IORedirectUtil.redirectLinesLog(exec.getErrorStream(), LOG);
+
+    if (exec.waitFor() != 0) {
+      throw new RuntimeException("Error staging template, check Maven logs.");
+    }
+    gcsClient.uploadArtifact(
+        gcsPathPrefix + "/customTransformation.jar",
+        "../spanner-custom-shard/target/spanner-custom-shard-1.0-SNAPSHOT.jar");
   }
 
   protected void loadSQLFileResource(
