@@ -440,7 +440,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     if (exec.waitFor() != 0) {
       throw new RuntimeException("Error staging template, check Maven logs.");
     }
-    gcsClient.uploadArtifact(
+    gcsResourceManager.uploadArtifact(
         gcsPathPrefix + "/customTransformation.jar",
         "../spanner-custom-shard/target/spanner-custom-shard-1.0-SNAPSHOT.jar");
   }
