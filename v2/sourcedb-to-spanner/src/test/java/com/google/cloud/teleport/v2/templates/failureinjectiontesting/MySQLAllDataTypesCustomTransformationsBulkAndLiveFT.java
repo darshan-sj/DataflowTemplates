@@ -36,6 +36,7 @@ import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
 import org.apache.beam.it.conditions.ChainedConditionCheck;
 import org.apache.beam.it.conditions.ConditionCheck;
+import org.apache.beam.it.gcp.cloudsql.CloudMySQLResourceManager;
 import org.apache.beam.it.gcp.dataflow.FlexTemplateDataflowJobResourceManager;
 import org.apache.beam.it.gcp.datastream.conditions.DlqEventsCountCheck;
 import org.apache.beam.it.gcp.pubsub.PubsubResourceManager;
@@ -43,7 +44,6 @@ import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
 import org.apache.beam.it.gcp.spanner.conditions.SpannerRowsCheck;
 import org.apache.beam.it.gcp.spanner.matchers.SpannerAsserts;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
-import org.apache.beam.it.jdbc.MySQLResourceManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +74,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
   private static PipelineLauncher.LaunchInfo bulkJobInfo;
   private static PipelineLauncher.LaunchInfo retryLiveJobInfo;
 
-  public static MySQLResourceManager mySQLResourceManager;
+  public static CloudMySQLResourceManager mySQLResourceManager;
   public static SpannerResourceManager spannerResourceManager;
   private static GcsResourceManager gcsResourceManager;
   private static PubsubResourceManager pubsubResourceManager;
@@ -348,7 +348,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
       String jobName,
       SpannerResourceManager spannerResourceManager,
       GcsResourceManager gcsResourceManager,
-      MySQLResourceManager mySQLResourceManager,
+      CloudMySQLResourceManager mySQLResourceManager,
       CustomTransformation customTransformation)
       throws IOException {
 
@@ -469,7 +469,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     LOG.info("Successfully loaded sql to jdbc resource manager");
   }
 
-  public org.apache.beam.it.jdbc.MySQLResourceManager setUpMySQLResourceManager() {
-    return org.apache.beam.it.jdbc.MySQLResourceManager.builder(testName).build();
+  public CloudMySQLResourceManager setUpMySQLResourceManager() {
+    return CloudMySQLResourceManager.builder(testName).build();
   }
 }
