@@ -245,8 +245,8 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     // binary_col is padded, skipping for simplicity in insert but verified in expected if possible
     // row.put("binary_col", "bin" + id);
     row.put("varbinary_col", "varbin" + id);
-    row.put("bit_col", id);
-    row.put("bit8_col", id);
+    row.put("bit_col", "b'0111111111111111111111111111111111111111111111111111111111111111'");
+    row.put("bit8_col", "b'11111111'");
     row.put("bit1_col", 1);
     row.put("boolean_col", true);
     row.put("int_col", 1000 + id);
@@ -254,6 +254,13 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     row.put("timestamp_col", "2023-01-0" + id + " 12:00:00");
     row.put("set_col", "v1");
     return row;
+  }
+
+  private Object applyQuote(String val) {
+    if (val.startsWith("'") || val.startsWith("b'")) {
+      return val;
+    }
+    return "'" + val + "'";
   }
 
   private void insertRow(Map<String, Object> row) {
@@ -267,7 +274,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
       cols.append(entry.getKey());
       Object value = entry.getValue();
       if (value instanceof String) {
-        vals.append("'").append(value).append("'");
+        vals.append(applyQuote((String) value));
       } else if (value instanceof Boolean) {
         vals.append((Boolean) value ? 1 : 0);
       } else {
@@ -329,13 +336,9 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     row.put(
         "varbinary_col", java.util.Base64.getEncoder().encodeToString(("varbin" + id).getBytes()));
 
-    byte[] bitBytes = new byte[8];
-    bitBytes[7] = (byte) id;
-    row.put("bit_col", java.util.Base64.getEncoder().encodeToString(bitBytes));
+    row.put("bit_col", "f/////////8=");
 
-    byte[] bit8Bytes = new byte[1];
-    bit8Bytes[0] = (byte) id;
-    row.put("bit8_col", java.util.Base64.getEncoder().encodeToString(bit8Bytes));
+    row.put("bit8_col", "255");
 
     row.put("bit1_col", true);
     row.put("boolean_col", true);
