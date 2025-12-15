@@ -100,7 +100,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     loadSQLFileResource(mySQLResourceManager, MYSQL_DDL_RESOURCE);
 
     // Insert Data
-    insertData();
+    // insertData();
 
     // create pubsub manager
     pubsubResourceManager = setUpPubSubResourceManager();
