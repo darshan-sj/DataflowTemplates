@@ -122,8 +122,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
   @After
   public void cleanUp() {
-    ResourceManagerUtils.cleanResources(
-        mySQLResourceManager, spannerResourceManager, pubsubResourceManager);
+    ResourceManagerUtils.cleanResources(spannerResourceManager, pubsubResourceManager);
   }
 
   @Test
