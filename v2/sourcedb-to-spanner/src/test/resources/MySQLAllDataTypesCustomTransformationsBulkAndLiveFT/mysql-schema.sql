@@ -1,6 +1,6 @@
 CREATE TABLE `AllDataTypes` (
     `id` INT PRIMARY KEY,
-    `varchar_col` VARCHAR(21000) CHARACTER SET utf8 DEFAULT NULL,
+    `varchar_col` VARCHAR(1000) CHARACTER SET utf8 DEFAULT NULL,
     `tinyint_col` TINYINT DEFAULT NULL,
     `tinyint_unsigned_col` TINYINT UNSIGNED DEFAULT NULL,
     `text_col` TEXT CHARACTER SET utf8 DEFAULT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE `AllDataTypes` (
     `enum_col` ENUM('1','2','3') CHARACTER SET utf8 DEFAULT NULL,
     `bool_col` TINYINT(1) DEFAULT NULL,
     `binary_col` BINARY(255) DEFAULT NULL,
-    `varbinary_col` VARBINARY(65000) DEFAULT NULL,
+    `varbinary_col` VARBINARY(1000) DEFAULT NULL,
     `bit_col` BIT(64) DEFAULT NULL,
     `bit8_col` BIT(8) DEFAULT NULL,
     `bit1_col` BIT(1) DEFAULT NULL,
