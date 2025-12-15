@@ -245,6 +245,12 @@
       <scope>test</scope>
       <version>${project.version}</version>
     </dependency>
+      <dependency>
+          <groupId>com.google.cloud.teleport.v2</groupId>
+          <artifactId>spanner-custom-shard</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>

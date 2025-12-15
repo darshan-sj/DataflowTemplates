@@ -82,12 +82,6 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
   @Before
   public void setUp() throws Exception {
-    // create Spanner Resources
-    spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
-
-    // create MySQL Resources
-    mySQLResourceManager = setUpMySQLResourceManager();
-    loadSQLFileResource(mySQLResourceManager, MYSQL_DDL_RESOURCE);
 
     // create and upload GCS Resources
     gcsResourceManager =
@@ -96,6 +90,13 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
     // Upload Custom Transformation Jar
     createAndUploadJarToGcs("CustomTransformationAllTypes");
+
+    // create Spanner Resources
+    spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
+
+    // create MySQL Resources
+    mySQLResourceManager = setUpMySQLResourceManager();
+    loadSQLFileResource(mySQLResourceManager, MYSQL_DDL_RESOURCE);
 
     // Insert Data
     insertData();
@@ -426,8 +427,11 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     return flexTemplateBuilder.build().launchJob();
   }
 
-  public void createAndUploadJarToGcs(String gcsPathPrefix) throws IOException {
-    String jarPath = "../spanner-custom-shard/target/spanner-custom-shard-1.0-SNAPSHOT.jar";
+  public void createAndUploadJarToGcs(String gcsPathPrefix)
+      throws IOException, InterruptedException {
+    // Note: The jar should be built before running the test using:
+    // mvn package -pl v2/spanner-custom-shard -am -DskipTests
+    String jarPath = "v2/spanner-custom-shard/target/spanner-custom-shard-1.0-SNAPSHOT.jar";
     gcsClient.uploadArtifact(gcsPathPrefix + "/customTransformation.jar", jarPath);
   }
 
