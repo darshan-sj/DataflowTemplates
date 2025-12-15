@@ -37,6 +37,9 @@ public class CustomTransformationAllTypesWithException implements ISpannerMigrat
   @Override
   public MigrationTransformationResponse toSpannerRow(MigrationTransformationRequest request)
       throws InvalidTransformationException {
+    if (true) {
+      throw new InvalidTransformationException("Simulated failure");
+    }
     if (request.getTableName().equals("AllDataTypes")) {
       Map<String, Object> row = new HashMap<>(request.getRequestRow());
       // Throw exception for specific row
