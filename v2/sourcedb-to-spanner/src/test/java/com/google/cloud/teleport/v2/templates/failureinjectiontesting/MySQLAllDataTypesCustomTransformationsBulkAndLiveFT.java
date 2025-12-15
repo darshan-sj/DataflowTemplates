@@ -197,26 +197,60 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
   private void insertData() {
     // Row 1: Valid
-    Map<String, Object> row1 = new HashMap<>();
-    row1.put("id", 1);
-    row1.put("varchar_col", "valid1");
-    row1.put("tinyint_col", 1);
-
+    Map<String, Object> row1 = createRow(1, "valid1");
     // Row 2: Valid
-    Map<String, Object> row2 = new HashMap<>();
-    row2.put("id", 2);
-    row2.put("varchar_col", "valid2");
-    row2.put("tinyint_col", 2);
-
-    // Row 3: Fail (varchar_col = "fail_me")
-    Map<String, Object> row3 = new HashMap<>();
-    row3.put("id", 3);
-    row3.put("varchar_col", "fail_me");
-    row3.put("tinyint_col", 3);
+    Map<String, Object> row2 = createRow(2, "valid2");
+    // Row 3: Fail
+    Map<String, Object> row3 = createRow(3, "fail_me");
 
     insertRow(row1);
     insertRow(row2);
     insertRow(row3);
+  }
+
+  private Map<String, Object> createRow(int id, String varcharVal) {
+    Map<String, Object> row = new HashMap<>();
+    row.put("id", id);
+    row.put("varchar_col", varcharVal);
+    row.put("tinyint_col", id);
+    row.put("tinyint_unsigned_col", id);
+    row.put("text_col", "text" + id);
+    row.put("date_col", "2023-01-0" + id);
+    row.put("smallint_col", 10 + id);
+    row.put("smallint_unsigned_col", 10 + id);
+    row.put("mediumint_col", 100 + id);
+    row.put("mediumint_unsigned_col", 100 + id);
+    row.put("bigint_col", 1000L + id);
+    row.put("bigint_unsigned_col", 1000L + id);
+    row.put("float_col", 1.5f + id);
+    row.put("double_col", 2.5d + id);
+    row.put("decimal_col", 10.5 + id);
+    row.put("datetime_col", "2023-01-0" + id + " 12:00:00");
+    row.put("time_col", "12:00:0" + id);
+    row.put("year_col", 2023 + id);
+    row.put("char_col", "c" + id);
+    row.put("tinyblob_col", "blob" + id);
+    row.put("tinytext_col", "tinytext" + id);
+    row.put("blob_col", "blob" + id);
+    row.put("mediumblob_col", "mediumblob" + id);
+    row.put("mediumtext_col", "mediumtext" + id);
+    row.put("test_json_col", "{\"k\":\"v" + id + "\"}");
+    row.put("longblob_col", "longblob" + id);
+    row.put("longtext_col", "longtext" + id);
+    row.put("enum_col", "1");
+    row.put("bool_col", true);
+    // binary_col is padded, skipping for simplicity in insert but verified in expected if possible
+    // row.put("binary_col", "bin" + id);
+    row.put("varbinary_col", "varbin" + id);
+    row.put("bit_col", id);
+    row.put("bit8_col", id);
+    row.put("bit1_col", 1);
+    row.put("boolean_col", true);
+    row.put("int_col", 1000 + id);
+    row.put("integer_unsigned_col", 1000 + id);
+    row.put("timestamp_col", "2023-01-0" + id + " 12:00:00");
+    row.put("set_col", "v1");
+    return row;
   }
 
   private void insertRow(Map<String, Object> row) {
@@ -228,10 +262,13 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
         vals.append(", ");
       }
       cols.append(entry.getKey());
-      if (entry.getValue() instanceof String) {
-        vals.append("'").append(entry.getValue()).append("'");
+      Object value = entry.getValue();
+      if (value instanceof String) {
+        vals.append("'").append(value).append("'");
+      } else if (value instanceof Boolean) {
+        vals.append((Boolean) value ? 1 : 0);
       } else {
-        vals.append(entry.getValue());
+        vals.append(value);
       }
     }
     String sql =
@@ -242,28 +279,69 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
 
   private List<Map<String, Object>> getExpectedData() {
     List<Map<String, Object>> data = new ArrayList<>();
-    // Row 1
-    Map<String, Object> row1 = new HashMap<>();
-    row1.put("id", 1);
-    row1.put("varchar_col", "valid1");
-    row1.put("tinyint_col", 1);
-    data.add(row1);
-
-    // Row 2
-    Map<String, Object> row2 = new HashMap<>();
-    row2.put("id", 2);
-    row2.put("varchar_col", "valid2");
-    row2.put("tinyint_col", 2);
-    data.add(row2);
-
-    // Row 3 (was failed, now succeeded)
-    Map<String, Object> row3 = new HashMap<>();
-    row3.put("id", 3);
-    row3.put("varchar_col", "fail_me");
-    row3.put("tinyint_col", 3);
-    data.add(row3);
-
+    data.add(createExpectedRow(1, "valid1"));
+    data.add(createExpectedRow(2, "valid2"));
+    data.add(createExpectedRow(3, "fail_me"));
     return data;
+  }
+
+  private Map<String, Object> createExpectedRow(int id, String varcharVal) {
+    Map<String, Object> row = new HashMap<>();
+    row.put("id", id);
+    row.put("varchar_col", varcharVal);
+    row.put("tinyint_col", id);
+    row.put("tinyint_unsigned_col", id);
+    row.put("text_col", "text" + id);
+    row.put("date_col", "2023-01-0" + id);
+    row.put("smallint_col", 10 + id);
+    row.put("smallint_unsigned_col", 10 + id);
+    row.put("mediumint_col", 100 + id);
+    row.put("mediumint_unsigned_col", 100 + id);
+    row.put("bigint_col", 1000L + id);
+    row.put("bigint_unsigned_col", 1000L + id);
+    row.put("float_col", (double) (1.5f + id));
+    row.put("double_col", 2.5d + id);
+    row.put("decimal_col", new java.math.BigDecimal(10.5 + id));
+    row.put("datetime_col", "2023-01-0" + id + "T12:00:00Z");
+    row.put("time_col", "12:00:0" + id);
+    row.put("year_col", String.valueOf(2023 + id));
+    row.put("char_col", "c" + id);
+
+    String b64blob = java.util.Base64.getEncoder().encodeToString(("blob" + id).getBytes());
+    row.put("tinyblob_col", b64blob);
+    row.put("blob_col", b64blob);
+    row.put(
+        "mediumblob_col",
+        java.util.Base64.getEncoder().encodeToString(("mediumblob" + id).getBytes()));
+
+    row.put("tinytext_col", "tinytext" + id);
+    row.put("mediumtext_col", "mediumtext" + id);
+    row.put("test_json_col", "{\"k\":\"v" + id + "\"}");
+    row.put(
+        "longblob_col", java.util.Base64.getEncoder().encodeToString(("longblob" + id).getBytes()));
+    row.put("longtext_col", "longtext" + id);
+    row.put("enum_col", "1");
+    row.put("bool_col", true);
+
+    row.put(
+        "varbinary_col", java.util.Base64.getEncoder().encodeToString(("varbin" + id).getBytes()));
+
+    byte[] bitBytes = new byte[8];
+    bitBytes[7] = (byte) id;
+    row.put("bit_col", java.util.Base64.getEncoder().encodeToString(bitBytes));
+
+    byte[] bit8Bytes = new byte[1];
+    bit8Bytes[0] = (byte) id;
+    row.put("bit8_col", java.util.Base64.getEncoder().encodeToString(bit8Bytes));
+
+    row.put("bit1_col", true);
+    row.put("boolean_col", true);
+    row.put("int_col", 1000 + id);
+    row.put("integer_unsigned_col", 1000 + id);
+    row.put("timestamp_col", "2023-01-0" + id + "T12:00:00Z");
+    row.put("set_col", "v1");
+
+    return row;
   }
 
   private PipelineLauncher.LaunchInfo launchBulkDataflowJob(
