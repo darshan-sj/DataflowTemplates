@@ -107,7 +107,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     // Define Custom Transformation with Exception (Bad)
     CustomTransformation customTransformationBad =
         CustomTransformation.builder(
-                "customTransformation.jar", "com.custom.CustomTransformationAllTypesWithException")
+                "customTransformation.jar", "com.custom.CustomTransformationAllTypes")
             .build();
 
     // launch bulk migration
