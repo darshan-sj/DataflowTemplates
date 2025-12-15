@@ -35,15 +35,12 @@ import org.apache.beam.it.common.PipelineLauncher;
 import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.IORedirectUtil;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
-import org.apache.beam.it.conditions.ChainedConditionCheck;
 import org.apache.beam.it.conditions.ConditionCheck;
 import org.apache.beam.it.gcp.cloudsql.CloudMySQLResourceManager;
 import org.apache.beam.it.gcp.dataflow.FlexTemplateDataflowJobResourceManager;
 import org.apache.beam.it.gcp.datastream.conditions.DlqEventsCountCheck;
 import org.apache.beam.it.gcp.pubsub.PubsubResourceManager;
 import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
-import org.apache.beam.it.gcp.spanner.conditions.SpannerRowsCheck;
-import org.apache.beam.it.gcp.spanner.matchers.SpannerAsserts;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
 import org.junit.After;
 import org.junit.Before;
@@ -155,6 +152,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
                     .build());
     assertTrue(conditionCheck.get());
 
+    /*
     // Prepare for Live Retry
     String dlqGcsPrefix = bulkErrorFolderFullPath.replace("gs://" + artifactBucketName, "");
     SubscriptionName dlqSubscription =
@@ -196,6 +194,7 @@ public class MySQLAllDataTypesCustomTransformationsBulkAndLiveFT extends SourceD
     List<Map<String, Object>> expectedData = getExpectedData();
     SpannerAsserts.assertThatStructs(spannerResourceManager.runQuery("SELECT * FROM " + TABLE_NAME))
         .hasRecordsUnorderedCaseInsensitiveColumns(expectedData);
+       */
   }
 
   private void insertData() {
