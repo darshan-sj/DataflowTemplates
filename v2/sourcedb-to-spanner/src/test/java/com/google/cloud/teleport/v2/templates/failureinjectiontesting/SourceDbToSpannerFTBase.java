@@ -259,6 +259,7 @@ public abstract class SourceDbToSpannerFTBase extends TemplateTestBase {
             .addParameter("datastreamSourceType", "mysql")
             .addParameter("inputFileFormat", "avro")
             .addParameter("runMode", "retryDLQ")
+            .addParameter("dlqRetryMinutes", "1")
             .build();
 
     // Run
