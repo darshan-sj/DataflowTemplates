@@ -215,7 +215,7 @@ public class DeadLetterQueue implements Serializable {
             f,
             e);
       }
-      json.put(f.name(), value == null ? null : value.toString());
+      json.put(f.name(), value == null ? null : isNumber(value) ? value : value.toString());
     }
     if (r.row().shardId() != null) {
       // Added default to not fail in the DLQ flow if the src table is not found in map
@@ -231,6 +231,10 @@ public class DeadLetterQueue implements Serializable {
               "TransformationFailed: " + r.err() + "\n" + r.getStackTraceString());
     }
     return dlqElement;
+  }
+
+  private boolean isNumber(Object value) {
+    return value instanceof Number;
   }
 
   public void failedMutationsToDLQ(
