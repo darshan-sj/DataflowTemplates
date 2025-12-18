@@ -121,7 +121,7 @@ public class MySQLBulkAndLiveSpannerFT extends SourceDbToSpannerFTBase {
   @After
   public void cleanUp() throws IOException {
     ResourceManagerUtils.cleanResources(
-        spannerResourceManager, gcsResourceManager, sourceDBResourceManager, pubsubResourceManager);
+        spannerResourceManager, sourceDBResourceManager, pubsubResourceManager);
   }
 
   @Test
