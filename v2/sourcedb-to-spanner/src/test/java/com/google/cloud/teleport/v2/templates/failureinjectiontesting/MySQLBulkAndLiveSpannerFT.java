@@ -25,7 +25,6 @@ import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontesting.MySQLSrcDataProvider;
 import com.google.cloud.teleport.v2.templates.SourceDbToSpanner;
-import com.google.pubsub.v1.SubscriptionName;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
@@ -156,10 +155,10 @@ public class MySQLBulkAndLiveSpannerFT extends SourceDbToSpannerFTBase {
     spannerResourceManager.executeDdlStatement(
         "ALTER TABLE `Authors` ALTER COLUMN `name` STRING(200)");
 
-    String dlqGcsPrefix = bulkErrorFolderFullPath.replace("gs://" + artifactBucketName, "");
-    SubscriptionName dlqSubscription =
-        createPubsubResources(
-            testName + "dlq", pubsubResourceManager, dlqGcsPrefix, gcsResourceManager);
+    //    String dlqGcsPrefix = bulkErrorFolderFullPath.replace("gs://" + artifactBucketName, "");
+    //    SubscriptionName dlqSubscription =
+    //        createPubsubResources(
+    //            testName + "dlq", pubsubResourceManager, dlqGcsPrefix, gcsResourceManager);
 
     // launch forward migration template in retryDLQ mode
     retryLiveJobInfo =
@@ -167,13 +166,17 @@ public class MySQLBulkAndLiveSpannerFT extends SourceDbToSpannerFTBase {
             spannerResourceManager,
             bulkErrorFolderFullPath,
             bulkErrorFolderFullPath + "/dlq",
-            dlqSubscription);
+            null);
 
     // TODO: Add number of rows check on Books table after b/465412503 is fixed.
     conditionCheck =
         ChainedConditionCheck.builder(
                 List.of(
                     SpannerRowsCheck.builder(spannerResourceManager, AUTHORS_TABLE)
+                        .setMinRows(200)
+                        .setMaxRows(200)
+                        .build(),
+                    SpannerRowsCheck.builder(spannerResourceManager, BOOKS_TABLE)
                         .setMinRows(200)
                         .setMaxRows(200)
                         .build()))

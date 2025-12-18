@@ -254,7 +254,8 @@ public abstract class SourceDbToSpannerFTBase extends TemplateTestBase {
             .addParameter("databaseId", spannerResourceManager.getDatabaseId())
             .addParameter("projectId", PROJECT)
             .addParameter("deadLetterQueueDirectory", dlqLocationFullPath)
-            .addParameter("dlqGcsPubSubSubscription", dlqPubSubSubscription.toString())
+            //            .addParameter("dlqGcsPubSubSubscription",
+            // dlqPubSubSubscription.toString())
             .addParameter("datastreamSourceType", "mysql")
             .addParameter("inputFileFormat", "avro")
             .addParameter("runMode", "retryDLQ")
