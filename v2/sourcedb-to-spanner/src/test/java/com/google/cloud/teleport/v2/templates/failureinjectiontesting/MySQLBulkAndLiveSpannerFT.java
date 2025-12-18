@@ -134,18 +134,17 @@ public class MySQLBulkAndLiveSpannerFT extends SourceDbToSpannerFTBase {
         pipelineOperator().waitUntilDone(createConfig(bulkJobInfo, Duration.ofMinutes(20)));
     assertThatResult(result).isLaunchFinished();
     ConditionCheck conditionCheck =
-        // Total events = successfully processed events + errors in output folder
-        new TotalEventsProcessedCheck(
-                spannerResourceManager,
-                List.of(AUTHORS_TABLE, BOOKS_TABLE),
-                gcsResourceManager,
-                "output/dlq/severe/",
-                400)
+        DlqEventsCountCheck.builder(gcsResourceManager, "output/dlq/severe/")
+            .setMinEvents(382)
+            .build()
             .and(
-                // Check that there are at least 191 errors in DLQ
-                DlqEventsCountCheck.builder(gcsResourceManager, "output/dlq/severe/")
-                    .setMinEvents(382)
-                    .build());
+                // Total events = successfully processed events + errors in output folder
+                new TotalEventsProcessedCheck(
+                    spannerResourceManager,
+                    List.of(AUTHORS_TABLE, BOOKS_TABLE),
+                    gcsResourceManager,
+                    "output/dlq/severe/",
+                    400));
 
     assertTrue(conditionCheck.get());
 
