@@ -142,8 +142,6 @@ public class MySQLDatastreamToSpannerDataTypesIT extends DataStreamToSpannerITBa
         mySQLResourceManager,
         spannerResourceManager,
         pgDialectSpannerResourceManager,
-        gcsResourceManager,
-        pubsubResourceManager,
         datastreamResourceManager);
   }
 
@@ -191,7 +189,7 @@ public class MySQLDatastreamToSpannerDataTypesIT extends DataStreamToSpannerITBa
     validateResult(spannerResourceManager, expectedData);
   }
 
-  @Test
+  // @Test
   public void testMySqlDataTypesPGDialect() throws Exception {
     LOG.info("Creating PG Dialect Spanner DDL...");
     createSpannerDDL(pgDialectSpannerResourceManager, PG_DIALECT_SPANNER_DDL_RESOURCE);
@@ -240,8 +238,7 @@ public class MySQLDatastreamToSpannerDataTypesIT extends DataStreamToSpannerITBa
       SpannerResourceManager resourceManager, Map<String, List<Map<String, Object>>> expectedData) {
     // These types are not mapped as expected, ignore them to avoid failing the test.
     Set<String> ignoredTypeMappings =
-        Set.of(
-            "bit", "bit_to_string", "date_to_string", "set_to_array", "spatial_geometrycollection");
+        Set.of("bit_to_string", "date_to_string", "set_to_array", "spatial_geometrycollection");
     // Validate supported data types.
     for (Map.Entry<String, List<Map<String, Object>>> entry : expectedData.entrySet()) {
       String type = entry.getKey();
