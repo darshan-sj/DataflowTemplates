@@ -157,6 +157,7 @@ public class CassandraAllDataTypesIT extends SourceDbToSpannerITBase {
    */
   @Before
   public void setUp() {
+    skipBaseCleanup = true;
     cassandraResourceManager = setupCassandraResourceManager();
     spannerResourceManager = setUpSpannerResourceManager();
   }
