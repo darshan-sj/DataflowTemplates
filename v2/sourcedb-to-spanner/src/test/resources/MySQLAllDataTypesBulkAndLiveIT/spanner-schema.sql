@@ -72,7 +72,7 @@ CREATE TABLE AllDataTypes_SWF (
                               bool_col BOOL,
                               binary_col BYTES(MAX),
                               varbinary_col BYTES(MAX),
-                              bit_col BYTES(4),
+                              bit_col BYTES(MAX),
                               bit8_col INT64,
                               bit1_col BOOL,
                               boolean_col BOOL,
