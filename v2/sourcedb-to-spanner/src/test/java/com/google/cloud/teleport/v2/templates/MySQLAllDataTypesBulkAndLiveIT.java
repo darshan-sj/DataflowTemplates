@@ -228,7 +228,9 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
      */
     // Verify SWF Data
     List<Map<String, Object>> expectedDataNonNull = getExpectedData();
-    SpannerAsserts.assertThatStructs(spannerResourceManager.runQuery("SELECT * FROM " + TABLE_SWF))
+    SpannerAsserts.assertThatStructs(
+            spannerResourceManager.readTableRecords(
+                TABLE_SWF, expectedDataNonNull.get(0).keySet().toArray(new String[0])))
         .hasRecordsUnorderedCaseInsensitiveColumns(expectedDataNonNull);
   }
 
