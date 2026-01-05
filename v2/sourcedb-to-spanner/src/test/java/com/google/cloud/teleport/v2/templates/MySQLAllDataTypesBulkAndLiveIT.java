@@ -165,7 +165,7 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     // Total: 4 + 3 + 191 + 191 = 389
     assertTrue(
         DlqEventsCountCheck.builder(gcsResourceManager, "output/dlq/severe/")
-            .setMinEvents(389)
+            .setMinEvents(390)
             .build()
             .get());
 
@@ -202,8 +202,8 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
                         .setMaxRows(4)
                         .build(),
                     SpannerRowsCheck.builder(spannerResourceManager, TABLE_SWF)
-                        .setMinRows(3)
-                        .setMaxRows(3)
+                        .setMinRows(4)
+                        .setMaxRows(4)
                         .build(),
                     SpannerRowsCheck.builder(spannerResourceManager, AUTHORS_TABLE)
                         .setMinRows(200)
@@ -218,7 +218,7 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     assertThatResult(
             pipelineOperator()
                 .waitForConditionAndCancel(
-                    createConfig(liveJobInfo, Duration.ofMinutes(15)), conditionCheck))
+                    createConfig(liveJobInfo, Duration.ofMinutes(8)), conditionCheck))
         .meetsConditions();
 
     // Verify CT Data
@@ -230,8 +230,11 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     verifyNullRow(allRecordsCT);
 
     // Verify SWF Data
-    SpannerAsserts.assertThatStructs(spannerResourceManager.runQuery("SELECT * FROM " + TABLE_SWF))
+    List<com.google.cloud.spanner.Struct> allRecordsSWF =
+        spannerResourceManager.runQuery("SELECT * FROM " + TABLE_SWF);
+    SpannerAsserts.assertThatStructs(allRecordsSWF)
         .hasRecordsUnorderedCaseInsensitiveColumns(expectedDataNonNull);
+    verifyNullRowSWF(allRecordsSWF);
   }
 
   private void verifyNullRow(List<com.google.cloud.spanner.Struct> structs) {
@@ -239,6 +242,22 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
       if (struct.getLong("id") == 4) {
         for (com.google.cloud.spanner.Type.StructField field : struct.getType().getStructFields()) {
           if (field.getName().equalsIgnoreCase("id")) {
+            continue;
+          }
+          assertTrue(
+              "Field " + field.getName() + " should be null", struct.isNull(field.getName()));
+        }
+        break;
+      }
+    }
+  }
+
+  private void verifyNullRowSWF(List<com.google.cloud.spanner.Struct> structs) {
+    for (com.google.cloud.spanner.Struct struct : structs) {
+      if (struct.getLong("id") == 4) {
+        for (com.google.cloud.spanner.Type.StructField field : struct.getType().getStructFields()) {
+          if (field.getName().equalsIgnoreCase("id")
+              || field.getName().equalsIgnoreCase("bit_col")) {
             continue;
           }
           assertTrue(
