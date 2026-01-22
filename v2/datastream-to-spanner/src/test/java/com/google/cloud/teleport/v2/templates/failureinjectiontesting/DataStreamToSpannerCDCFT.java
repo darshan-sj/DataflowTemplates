@@ -138,11 +138,11 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
             artifactBucket, gcsPrefix, sourceConnectionProfile, datastreamResourceManager);
 
     int numRows = 10;
-    int burstIterations = 10000;
+    int burstIterations = 100000;
 
     // generate Load
     cdcLoadGenerator = new FuzzyCDCLoadGenerator();
-    cdcLoadGenerator.generateLoad(numRows, burstIterations, 0.5, sourceDBResourceManager);
+    cdcLoadGenerator.generateLoad(numRows, burstIterations, 1.0, sourceDBResourceManager);
 
     FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
         FlexTemplateDataflowJobResourceManager.builder(testName)
