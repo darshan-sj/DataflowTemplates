@@ -84,6 +84,7 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
    */
   @Before
   public void setUp() throws IOException, InterruptedException {
+    skipBaseCleanup = true;
     // create Spanner Resources
     spannerResourceManager = createSpannerDatabase(SPANNER_DDL_RESOURCE);
     shadowTableSpannerResourceManager =
