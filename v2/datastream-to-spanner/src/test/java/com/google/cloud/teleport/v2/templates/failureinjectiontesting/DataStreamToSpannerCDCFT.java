@@ -138,8 +138,8 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
         createDataStreamResources(
             artifactBucket, gcsPrefix, sourceConnectionProfile, datastreamResourceManager);
 
-    int numRows = 10;
-    int burstIterations = 100000;
+    int numRows = 1000;
+    int burstIterations = 1000000;
 
     // generate Load
     cdcLoadGenerator = new FuzzyCDCLoadGenerator();
@@ -202,7 +202,7 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
     PipelineOperator.Result result =
         pipelineOperator()
             .waitForCondition(
-                createConfig(jobInfo, Duration.ofHours(1)), spannerRowCountConditionCheck);
+                createConfig(jobInfo, Duration.ofHours(3)), spannerRowCountConditionCheck);
     assertThatResult(result).meetsConditions();
 
     // Usually the dataflow finishes processing the events within 10 minutes. Giving 10 more minutes
