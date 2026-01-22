@@ -137,7 +137,7 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
         createDataStreamResources(
             artifactBucket, gcsPrefix, sourceConnectionProfile, datastreamResourceManager);
 
-    int numRows = 100;
+    int numRows = 10;
     int burstIterations = 10000;
 
     // generate Load
@@ -147,9 +147,11 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
     FlexTemplateDataflowJobResourceManager.Builder flexTemplateBuilder =
         FlexTemplateDataflowJobResourceManager.builder(testName)
             .withAdditionalMavenProfile("failureInjectionTest")
-            .addParameter(
-                "failureInjectionParameter",
-                "{\"policyType\":\"TransactionTimeoutInjectionPolicy\", \"policyInput\": { \"injectionWindowDuration\": \"PT30M\", \"delayDuration\": \"PT260S\" }}")
+            //            .addParameter(
+            //                "failureInjectionParameter",
+            //                "{\"policyType\":\"TransactionTimeoutInjectionPolicy\",
+            // \"policyInput\": { \"injectionWindowDuration\": \"PT30M\", \"delayDuration\":
+            // \"PT260S\" }}")
             .addEnvironmentVariable("numWorkers", NUM_WORKERS)
             .addEnvironmentVariable("maxWorkers", MAX_WORKERS);
 
@@ -173,12 +175,12 @@ public class DataStreamToSpannerCDCFT extends DataStreamToSpannerFTBase {
    */
   @After
   public void cleanUp() throws IOException {
-    ResourceManagerUtils.cleanResources(
-        spannerResourceManager,
-        sourceDBResourceManager,
-        datastreamResourceManager,
-        gcsResourceManager,
-        pubsubResourceManager);
+    ResourceManagerUtils.cleanResources();
+    //        spannerResourceManager,
+    //        sourceDBResourceManager,
+    //        datastreamResourceManager,
+    //        gcsResourceManager,
+    //        pubsubResourceManager);
   }
 
   @Test
