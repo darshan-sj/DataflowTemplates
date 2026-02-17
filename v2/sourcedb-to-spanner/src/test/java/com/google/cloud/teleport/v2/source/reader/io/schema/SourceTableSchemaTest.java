@@ -22,10 +22,10 @@ import com.google.cloud.teleport.v2.source.reader.io.schema.typemapping.UnifiedT
 import junit.framework.TestCase;
 import org.apache.avro.SchemaBuilder;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.junit.Ignore;
 
 /** Test class for {@link SourceTableSchema}. */
 @RunWith(MockitoJUnitRunner.class)
