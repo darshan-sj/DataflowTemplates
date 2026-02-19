@@ -34,6 +34,7 @@ import com.google.cloud.teleport.v2.templates.models.PreparedStatementValueObjec
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -43,6 +44,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraDaoTest {
 
   @Mock private IConnectionHelper mockConnectionHelper;

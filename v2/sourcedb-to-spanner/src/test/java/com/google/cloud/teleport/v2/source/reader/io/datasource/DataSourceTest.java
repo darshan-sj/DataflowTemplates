@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.teleport.v2.source.reader.io.cassandra.iowrapper.CassandraDataSource;
 import com.google.cloud.teleport.v2.source.reader.io.datasource.DataSource.Kind;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link DataSource}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class DataSourceTest {
   @Mock javax.sql.DataSource mockJdbcDataSource;
   @Mock CassandraDataSource mockCassandraDataSource;

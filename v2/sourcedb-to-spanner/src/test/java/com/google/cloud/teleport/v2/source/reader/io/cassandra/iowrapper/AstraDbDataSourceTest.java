@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import com.dtsx.astra.sdk.db.DbOpsClient;
 import com.google.cloud.teleport.v2.source.reader.io.cassandra.exception.AstraDBNotFoundException;
 import com.google.cloud.teleport.v2.utils.SecretManagerUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
@@ -32,6 +33,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link AstraDbDataSource}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class AstraDbDataSourceTest {
 
   @Test

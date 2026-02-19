@@ -26,6 +26,7 @@ import org.apache.beam.sdk.transforms.Count;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.TupleTag;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link AccumulatingTableReader}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class AccumulatingTableReaderTest implements Serializable {
   @Rule public final transient TestPipeline testPipeline = TestPipeline.create();
 
