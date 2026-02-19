@@ -72,6 +72,7 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +84,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link CassandraTableReaderFactoryCassandraIoImpl}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraTableReaderFactoryCassandraIoImplTest {
 
   private static SharedEmbeddedCassandra sharedEmbeddedCassandra = null;

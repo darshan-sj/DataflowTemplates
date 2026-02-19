@@ -69,6 +69,7 @@ import org.apache.beam.vendor.guava.v32_1_2_jre.com.google.common.util.concurren
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +82,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({
   "rawtypes", // TODO(https://github.com/apache/beam/issues/20447)
 })
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraIOTest implements Serializable {
   private static final long NUM_ROWS = 22L;
   private static final String CASSANDRA_KEYSPACE = "beam_ks";

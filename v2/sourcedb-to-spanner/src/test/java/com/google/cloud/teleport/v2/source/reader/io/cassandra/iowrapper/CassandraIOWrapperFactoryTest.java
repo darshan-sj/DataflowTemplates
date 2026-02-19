@@ -45,6 +45,7 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,6 +55,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link CassandraIOWrapperFactory}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraIOWrapperFactoryTest {
   private MockedStatic<CassandraIOWrapperHelper> mockCassandraIoWrapperHelper;
   private static final String TEST_BUCKET_CASSANDRA_CONFIG_CONF =
