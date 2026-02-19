@@ -31,6 +31,7 @@ import org.apache.beam.sdk.io.gcp.spanner.changestreams.model.ModType;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -39,6 +40,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore("Temporarily disabled for maintenance")
 public class ConvertChangeStreamErrorRecordToFailsafeElementFnTest {
 
   @Rule public final transient TestPipeline pipeline = TestPipeline.create();

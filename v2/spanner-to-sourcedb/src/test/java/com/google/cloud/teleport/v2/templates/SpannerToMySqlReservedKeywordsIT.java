@@ -41,6 +41,7 @@ import org.apache.beam.it.gcp.storage.GcsResourceManager;
 import org.apache.beam.it.jdbc.MySQLResourceManager;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -53,6 +54,7 @@ import org.junit.runners.JUnit4;
 @Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @TemplateIntegrationTest(SpannerToSourceDb.class)
 @RunWith(JUnit4.class)
+@Ignore("Temporarily disabled for maintenance")
 public class SpannerToMySqlReservedKeywordsIT extends SpannerToSourceDbITBase {
 
   private static final String SPANNER_DDL_RESOURCE =

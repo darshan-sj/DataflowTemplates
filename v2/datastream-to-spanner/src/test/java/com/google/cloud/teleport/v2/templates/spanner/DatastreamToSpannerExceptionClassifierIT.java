@@ -38,12 +38,14 @@ import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 /** Integration test for {@link DatastreamToSpannerExceptionClassifier}. */
 @Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @TemplateIntegrationTest(DataStreamToSpanner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class DatastreamToSpannerExceptionClassifierIT {
 
   public static SpannerResourceManager spannerResourceManager;

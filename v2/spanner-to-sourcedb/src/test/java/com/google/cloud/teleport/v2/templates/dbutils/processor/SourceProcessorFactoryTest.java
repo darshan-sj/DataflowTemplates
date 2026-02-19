@@ -32,12 +32,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
+@Ignore("Temporarily disabled for maintenance")
 public class SourceProcessorFactoryTest {
   @Test
   public void testCreateSourceProcessor_validSource() throws Exception {

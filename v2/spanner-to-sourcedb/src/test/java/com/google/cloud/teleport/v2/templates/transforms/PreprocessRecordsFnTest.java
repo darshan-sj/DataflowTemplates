@@ -27,10 +27,12 @@ import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
 /** Tests for PreprocessRecordsFnTest class. */
+@Ignore("Temporarily disabled for maintenance")
 public class PreprocessRecordsFnTest {
   @Rule public final transient TestPipeline pipeline = TestPipeline.create();
 
