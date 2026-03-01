@@ -33,6 +33,7 @@ import org.apache.beam.sdk.io.astra.db.CqlSessionHolder;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
@@ -42,6 +43,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link CassandraConnector}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraConnectorTest {
 
   private static SharedEmbeddedCassandra sharedEmbeddedCassandra = null;

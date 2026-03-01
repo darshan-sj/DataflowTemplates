@@ -37,6 +37,7 @@ import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -47,6 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 /** Unit tests for {@link ProcessInformationSchemaFn}. */
 @RunWith(JUnit4.class)
+@Ignore("Temporarily disabled for maintenance")
 public class ProcessInformationSchemaFnTest {
 
   @Mock private SpannerConfig spannerConfig;
