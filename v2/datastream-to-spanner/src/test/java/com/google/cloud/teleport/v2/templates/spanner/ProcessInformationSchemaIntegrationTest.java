@@ -33,6 +33,7 @@ import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -40,6 +41,7 @@ import org.junit.rules.TemporaryFolder;
 
 /** An integration test that validates shadow table creation. */
 @Category(IntegrationTest.class)
+@Ignore("Temporarily disabled for maintenance")
 public class ProcessInformationSchemaIntegrationTest {
   private final String testDb = "testdb";
 

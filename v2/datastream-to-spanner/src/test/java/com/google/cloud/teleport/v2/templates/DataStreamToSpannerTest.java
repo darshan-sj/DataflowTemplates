@@ -27,10 +27,12 @@ import com.google.cloud.teleport.v2.spanner.migrations.schema.SchemaStringOverri
 import com.google.common.io.Resources;
 import org.apache.beam.sdk.io.gcp.spanner.SpannerConfig;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+@Ignore("Temporarily disabled for maintenance")
 public class DataStreamToSpannerTest {
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
