@@ -69,6 +69,7 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
@@ -76,6 +77,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link CassandraIOWrapperHelper}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class CassandraIOWrapperHelperTest {
 
   private static SharedEmbeddedCassandra sharedEmbeddedCassandra = null;

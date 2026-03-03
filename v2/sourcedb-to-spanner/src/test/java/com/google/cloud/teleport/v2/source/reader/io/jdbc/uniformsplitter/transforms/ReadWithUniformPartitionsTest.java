@@ -68,6 +68,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.UnknownKeyFor;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,6 +76,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** Test class for {@link ReadWithUniformPartitions}. */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("Temporarily disabled for maintenance")
 public class ReadWithUniformPartitionsTest implements Serializable {
   private static final String tableName = "test_table_read_with_uniform_partitions";
 

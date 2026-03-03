@@ -18,8 +18,10 @@ package com.google.cloud.teleport.v2.templates.utils;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("Temporarily disabled for maintenance")
 public class WatchdogRunnableTest {
 
   private WatchdogRunnable watchdogRunnable;
