@@ -19,17 +19,9 @@ import com.google.auto.value.AutoValue;
 import com.google.cloud.teleport.v2.io.WindowedFilenamePolicy;
 import org.apache.beam.sdk.io.FileBasedSink;
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime;
-import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.Repeatedly;
-import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 
 /** Transforms to write error messages in to DLQ. */
 public class DLQWriteTransform {
@@ -57,38 +49,18 @@ public class DLQWriteTransform {
 
     @Override
     public PDone expand(PCollection<String> input) {
-      return input
-          .apply(
-              ParDo.of(
-                  new DoFn<String, String>() {
-                    @ProcessElement
-                    public void process(ProcessContext context) {
-                      Instant now = Instant.now();
-                      context.outputWithTimestamp(context.element(), now);
-                    }
-                  }))
-          .apply(
-              "Creating 1m Window",
-              Window.<String>into(FixedWindows.of(Duration.standardMinutes(1)))
-                  .triggering(
-                      Repeatedly.forever(
-                          AfterProcessingTime.pastFirstElementInPane()
-                              .plusDelayOf(Duration.standardMinutes(1))))
-                  .withAllowedLateness(Duration.ZERO)
-                  .discardingFiredPanes())
-          .apply(
-              "DLQ: Write File(s)",
-              TextIO.write()
-                  .withWindowedWrites()
-                  .withNumShards(20)
-                  .to(
-                      WindowedFilenamePolicy.writeWindowedFiles()
-                          .withOutputDirectory(dlqDirectory())
-                          .withOutputFilenamePrefix(fileNamePrefix())
-                          .withShardTemplate(getShardTemplate())
-                          .withSuffix(".json"))
-                  .withTempDirectory(
-                      FileBasedSink.convertToFileResourceIfPossible(tmpDirectory())));
+      return input.apply(
+          "DLQ: Write File(s)",
+          TextIO.write()
+              .withWindowedWrites()
+              .withNumShards(0)
+              .to(
+                  WindowedFilenamePolicy.writeWindowedFiles()
+                      .withOutputDirectory(dlqDirectory())
+                      .withOutputFilenamePrefix(fileNamePrefix())
+                      .withShardTemplate(getShardTemplate())
+                      .withSuffix(".json"))
+              .withTempDirectory(FileBasedSink.convertToFileResourceIfPossible(tmpDirectory())));
     }
 
     private String getShardTemplate() {
