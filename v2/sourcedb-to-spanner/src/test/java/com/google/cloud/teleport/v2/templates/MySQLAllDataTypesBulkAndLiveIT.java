@@ -101,7 +101,7 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     loadSQLFileResource(mySQLResourceManager, MYSQL_DDL_RESOURCE);
 
     // Insert data for Authors and Books
-    MySQLSrcDataProvider.writeRowsInSourceDB(1, 1_000_000_000, mySQLResourceManager);
+    MySQLSrcDataProvider.writeRowsInSourceDB(1, 1_000_000, mySQLResourceManager);
   }
 
   @After
