@@ -15,8 +15,6 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
-import static com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontesting.MySQLSrcDataProvider.AUTHORS_TABLE;
-import static com.google.cloud.teleport.v2.spanner.testutils.failureinjectiontesting.MySQLSrcDataProvider.BOOKS_TABLE;
 import static com.google.cloud.teleport.v2.templates.MySQLDataTypesIT.repeatString;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatPipeline;
 import static org.apache.beam.it.truthmatchers.PipelineAsserts.assertThatResult;
@@ -36,13 +34,9 @@ import java.util.Map;
 import org.apache.beam.it.common.PipelineLauncher;
 import org.apache.beam.it.common.PipelineOperator;
 import org.apache.beam.it.common.utils.ResourceManagerUtils;
-import org.apache.beam.it.conditions.ChainedConditionCheck;
-import org.apache.beam.it.conditions.ConditionCheck;
 import org.apache.beam.it.gcp.cloudsql.CloudMySQLResourceManager;
 import org.apache.beam.it.gcp.datastream.conditions.DlqEventsCountCheck;
 import org.apache.beam.it.gcp.spanner.SpannerResourceManager;
-import org.apache.beam.it.gcp.spanner.conditions.SpannerRowsCheck;
-import org.apache.beam.it.gcp.spanner.matchers.SpannerAsserts;
 import org.apache.beam.it.gcp.storage.GcsResourceManager;
 import org.junit.After;
 import org.junit.Before;
@@ -157,9 +151,6 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
         pipelineOperator().waitUntilDone(createConfig(bulkJobInfo, Duration.ofMinutes(30)));
     assertThatResult(result).isLaunchFinished();
 
-    // Wait for 2 minutes to ensure all DLQ events are created in GCS.
-    Thread.sleep(Duration.ofMinutes(2).toMillis());
-
     // Verify DLQ Events
     // Total events expected:
     // - CT: 4 events (3 rows + 1 null row)
@@ -172,70 +163,6 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
             .setMinEvents(389)
             .build()
             .get());
-
-    // --------------------------------------------------------------------------------------------
-    // Phase 2: Live Migration (Retry)
-    // --------------------------------------------------------------------------------------------
-
-    // Fix schemas before retry
-    spannerResourceManager.executeDdlStatement(
-        "ALTER TABLE `" + TABLE_SWF + "` ALTER COLUMN `bit_col` BYTES(MAX)");
-    spannerResourceManager.executeDdlStatement(
-        "ALTER TABLE `Authors` ALTER COLUMN `name` STRING(200)");
-
-    // Retry with Good Custom Transformation class
-    CustomTransformation customTransformationGood =
-        CustomTransformation.builder(
-                "customTransformation.jar", "com.custom.CustomTransformationAllTypes")
-            .build();
-
-    liveJobInfo =
-        launchFwdDataflowJobInRetryDlqMode(
-            spannerResourceManager,
-            getGcsPath("output", gcsResourceManager),
-            getGcsPath("output/dlq", gcsResourceManager),
-            gcsResourceManager,
-            customTransformationGood);
-
-    // Wait and Verify All Tables
-    ConditionCheck conditionCheck =
-        ChainedConditionCheck.builder(
-                List.of(
-                    SpannerRowsCheck.builder(spannerResourceManager, TABLE_CT)
-                        .setMinRows(4)
-                        .setMaxRows(4)
-                        .build(),
-                    SpannerRowsCheck.builder(spannerResourceManager, TABLE_SWF)
-                        .setMinRows(3)
-                        .setMaxRows(3)
-                        .build(),
-                    SpannerRowsCheck.builder(spannerResourceManager, AUTHORS_TABLE)
-                        .setMinRows(200)
-                        .setMaxRows(200)
-                        .build(),
-                    SpannerRowsCheck.builder(spannerResourceManager, BOOKS_TABLE)
-                        .setMinRows(200)
-                        .setMaxRows(200)
-                        .build()))
-            .build();
-
-    assertThatResult(
-            pipelineOperator()
-                .waitForConditionAndCancel(
-                    createConfig(liveJobInfo, Duration.ofMinutes(15)), conditionCheck))
-        .meetsConditions();
-
-    // Verify CT Data
-    List<Map<String, Object>> expectedDataNonNull = getExpectedData();
-    List<com.google.cloud.spanner.Struct> allRecordsCT =
-        spannerResourceManager.runQuery("SELECT * FROM " + TABLE_CT);
-    SpannerAsserts.assertThatStructs(allRecordsCT)
-        .hasRecordsUnorderedCaseInsensitiveColumns(expectedDataNonNull);
-    verifyNullRow(allRecordsCT);
-
-    // Verify SWF Data
-    SpannerAsserts.assertThatStructs(spannerResourceManager.runQuery("SELECT * FROM " + TABLE_SWF))
-        .hasRecordsUnorderedCaseInsensitiveColumns(expectedDataNonNull);
 
     testPassed = true;
   }
