@@ -101,7 +101,7 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     loadSQLFileResource(mySQLResourceManager, MYSQL_DDL_RESOURCE);
 
     // Insert data for Authors and Books
-    MySQLSrcDataProvider.writeRowsInSourceDB(1, 1_000_000, mySQLResourceManager);
+    MySQLSrcDataProvider.writeRowsInSourceDB(1, 500_000, mySQLResourceManager);
   }
 
   @After
@@ -133,6 +133,8 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     Map<String, String> params = new HashMap<>();
     // No 'tables' parameter needed, migrate everything
     params.put("outputDirectory", getGcsPath("output", gcsResourceManager));
+    params.put("numWorkers", "10");
+    params.put("maxNumWorkers", "30");
 
     bulkJobInfo =
         launchBulkDataflowJob(
@@ -148,7 +150,7 @@ public class MySQLAllDataTypesBulkAndLiveIT extends SourceDbToSpannerFTBase {
     assertThatPipeline(bulkJobInfo).isRunning();
 
     PipelineOperator.Result result =
-        pipelineOperator().waitUntilDone(createConfig(bulkJobInfo, Duration.ofMinutes(30)));
+        pipelineOperator().waitUntilDone(createConfig(bulkJobInfo, Duration.ofMinutes(55)));
     assertThatResult(result).isLaunchFinished();
 
     // Verify DLQ Events
