@@ -32,8 +32,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class MySQLSourceDbToSpannerLT extends SourceDbToSpannerLTBase {
 
-  private static final String WORKER_MACHINE_TYPE = "n1-highmem-96";
-  private static final String LAUNCHER_MACHINE_TYPE = "n1-highmem-64";
+  private static final String WORKER_MACHINE_TYPE = "n2-highmem-4";
   private static final String FETCH_SIZE = "8000";
 
   @Test
@@ -68,12 +67,7 @@ public class MySQLSourceDbToSpannerLT extends SourceDbToSpannerLTBase {
             put("fetchSize", FETCH_SIZE);
           }
         };
-    Map<String, String> env =
-        new HashMap<>() {
-          {
-            put("launcherMachineType", LAUNCHER_MACHINE_TYPE);
-          }
-        };
+    Map<String, String> env = new HashMap<>();
     runLoadTest(expectedCountPerTable, params, env);
   }
 }

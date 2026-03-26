@@ -30,7 +30,6 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class MySQLSourceDbtoSpannerWideRow50KBFetchSizeLT extends SourceDbToSpannerLTBase {
   private static final String WORKER_MACHINE_TYPE = "n2-standard-4";
-  private static final String LAUNCHER_MACHINE_TYPE = "n2-standard-4";
 
   @Test
   public void mySQLToSpannerWideRow50KBFetchSizeTest() throws Exception {
@@ -61,12 +60,7 @@ public class MySQLSourceDbtoSpannerWideRow50KBFetchSizeLT extends SourceDbToSpan
           }
         };
 
-    Map<String, String> env =
-        new HashMap<>() {
-          {
-            put("launcherMachineType", LAUNCHER_MACHINE_TYPE);
-          }
-        };
+    Map<String, String> env = new HashMap<>();
     runLoadTest(expectedCountPerTable, params, env);
   }
 }
