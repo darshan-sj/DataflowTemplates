@@ -179,17 +179,17 @@ public class SpannerAccessor implements AutoCloseable {
           executeStreamingSqlSettings.getRetrySettings().toBuilder();
       executeStreamingSqlSettings.setRetrySettings(
           executeSqlStreamingRetrySettings
-              .setInitialRpcTimeoutDuration(java.time.Duration.ofMinutes(120))
-              .setMaxRpcTimeoutDuration(java.time.Duration.ofMinutes(120))
-              .setTotalTimeoutDuration(java.time.Duration.ofMinutes(120))
+              .setInitialRpcTimeoutDuration(java.time.Duration.ofMinutes(1))
+              .setMaxRpcTimeoutDuration(java.time.Duration.ofMinutes(1))
+              .setTotalTimeoutDuration(java.time.Duration.ofMinutes(1))
               .setRpcTimeoutMultiplier(1.0)
               .setInitialRetryDelayDuration(java.time.Duration.ofSeconds(2))
               .setMaxRetryDelayDuration(java.time.Duration.ofSeconds(60))
               .setRetryDelayMultiplier(1.5)
-              .setMaxAttempts(100)
+              .setMaxAttempts(5)
               .build());
       // This property sets the default timeout between 2 response packets in the client library.
-      System.setProperty("com.google.cloud.spanner.watchdogTimeoutSeconds", "7200");
+      System.setProperty("com.google.cloud.spanner.watchdogTimeoutSeconds", "60");
     }
 
     SpannerStubSettings.Builder spannerStubSettingsBuilder =
