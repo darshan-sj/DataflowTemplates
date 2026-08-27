@@ -254,10 +254,39 @@ abstract class BatchSpannerRead
 
       PartitionedReadOperation op = c.element();
       ServiceCallMetric serviceCallMetric = metricsForReadOperation.get(op.getReadOperation());
+      long outputStartNanos = System.nanoTime();
+      long outputDurationNanos = System.nanoTime();
+      long resultSetNextStartNanos = System.nanoTime();
+      long resultSetNextDurationNanos = System.nanoTime();
       try (ResultSet resultSet = batchTx.execute(op.getPartition())) {
-        while (resultSet.next()) {
-          Struct s = resultSet.getCurrentRowAsStruct();
-          c.output(s);
+        try {
+          while (resultSet.next()) {
+            resultSetNextDurationNanos = System.nanoTime() - resultSetNextStartNanos;
+            try {
+              Struct s = resultSet.getCurrentRowAsStruct();
+              outputStartNanos = System.nanoTime();
+              c.output(s);
+              outputDurationNanos = System.nanoTime() - outputStartNanos;
+            } catch (Throwable t) {
+              LOG.error(
+                  "CRITICAL: Downstream fused pipeline failed during c.output() for table {}: {}, Output time: {} mS, ResultSetNext time: {} mS",
+                  op.getReadOperation().tryGetTableName(),
+                  t.getMessage(),
+                  outputDurationNanos / 1_000_000L,
+                  resultSetNextDurationNanos / 1_000_000L,
+                  t);
+              throw t; // Rethrow to maintain pipeline semantics
+            }
+            resultSetNextStartNanos = System.nanoTime();
+          }
+        } catch (Throwable t) {
+          LOG.error(
+              "CRITICAL 1: OUTSIDE resultSet.next(), Row output time: {} mS, Previous ResultSetNext time: {} mS, LastResultSetNext time: {} mS",
+              outputDurationNanos / 1_000_000L,
+              resultSetNextDurationNanos / 1_000_000L,
+              (System.nanoTime() - resultSetNextStartNanos) / 1_000_000L,
+              t);
+          throw t; // Rethrow to maintain pipeline semantics
         }
       } catch (SpannerException e) {
         serviceCallMetric.call(e.getErrorCode().getGrpcStatusCode().toString());
